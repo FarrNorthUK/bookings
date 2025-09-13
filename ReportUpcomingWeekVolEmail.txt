@@ -1,8 +1,9 @@
 "Booking","When","From","To","Start","Pickup","Dropoff","Type"
-"15/09/2025","MON","Bettyhill","Thurso","00:00","09:00","00:00",""
+"15/09/2025","MON","Bettyhill","Thurso",,"09:00",,
 "15/09/2025","MON","Melvich","Strathy","12:50","13:20","14:00","Community"
 "18/09/2025","THU","Bettyhill","Wick","11:30","11:45","13:00","Social"
 "18/09/2025","THU","Melvich","Strathy","12:50","13:20","14:00","Medical"
 "19/09/2025","FRI","Bettyhill","Inverness","08:30","09:00","12:00","Medical"
 "25/09/2025","THU","Melvich","Thurso","09:00","09:30","10:10","Medical"
 "25/09/2025","THU","Melvich","Wick","14:20","15:00","16:15","Medical"
+
