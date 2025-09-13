@@ -1,8 +1,8 @@
-"DAY","Booking","From","To","Start","Pickup","Dropoff","Type","In/Out"
-"MON","15/09/2025","Bettyhill","Thurso","--:--","09:00","--:--",,
-"MON","15/09/2025","Melvich","Strathy","12:50","13:20","14:00","Community",
-"THU","18/09/2025","Bettyhill","Wick","11:30","11:45","13:00","Social",
-"THU","18/09/2025","Melvich","Strathy","12:50","13:20","14:00","Medical",
-"FRI","19/09/2025","Bettyhill","Inverness","08:30","09:00","12:00","Medical",
-"THU","25/09/2025","Melvich","Thurso","09:00","09:30","10:10","Medical",
-"THU","25/09/2025","Melvich","Wick","14:20","15:00","16:15","Medical",
+"Booking","DAY","From","To","Start","Pickup","Dropoff","Type","In/Out"
+"15/09/2025","MON","Bettyhill","Thurso","","09:00","",,
+"15/09/2025","MON","Melvich","Strathy","12:50","13:20","14:00","Community",
+"18/09/2025","THU","Bettyhill","Wick","11:30","11:45","13:00","Social",
+"18/09/2025","THU","Melvich","Strathy","12:50","13:20","14:00","Medical",
+"19/09/2025","FRI","Bettyhill","Inverness","08:30","09:00","12:00","Medical",
+"25/09/2025","THU","Melvich","Thurso","09:00","09:30","10:10","Medical",
+"25/09/2025","THU","Melvich","Wick","14:20","15:00","16:15","Medical",
