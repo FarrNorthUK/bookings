@@ -6,4 +6,3 @@
 "19/09/2025","FRI","Bettyhill","Inverness","08:30","09:00","12:00","Medical"
 "25/09/2025","THU","Melvich","Thurso","09:00","09:30","10:10","Medical"
 "25/09/2025","THU","Melvich","Wick","14:20","15:00","16:15","Medical"
-
