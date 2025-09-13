@@ -28,6 +28,7 @@
     Papa.parse('ReportUpcomingWeekVolEmail.txt', {
       download: true,
       header: true,
+      skipEmptyLines: true, // 👈 prevents blank row
       complete: function(results) {
         let data = results.data;
         if (data.length === 0) return;
