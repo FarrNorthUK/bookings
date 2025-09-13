@@ -29,12 +29,24 @@
       download: true,
       header: true,
       complete: function(results) {
-        const data = results.data;
+        let data = results.data;
         if (data.length === 0) return;
 
-        // Extract columns dynamically
-        const columns = Object.keys(data[0]).map(key => ({ title: key, data: key }));
+        // Get headers directly from PapaParse
+        const headers = results.meta.fields;
 
+        // Normalize rows: ensure every row has every header key
+        data = data.map(row => {
+          headers.forEach(h => {
+            if (!(h in row)) row[h] = ""; // fill missing with empty string
+          });
+          return row;
+        });
+
+        // Build DataTables columns
+        const columns = headers.map(h => ({ title: h, data: h }));
+
+        // Initialize DataTable
         $('#bookings').DataTable({
           data: data,
           columns: columns,
