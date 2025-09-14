@@ -13,10 +13,22 @@
     body { font-family: Arial, sans-serif; margin: 20px; }
     h1 { margin-bottom: 20px; }
     table { width: 100%; }
+
+    /* ✅ Improvement 3: Better readability */
+    table.dataTable tbody tr:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+    table.dataTable tbody td {
+      vertical-align: middle;
+    }
+    .dt-body-center {
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <h1>Car Bookings</h1>
+  <p id="loading">Loading bookings…</p> <!-- ✅ Improvement 6: Loading feedback -->
   <table id="bookings" class="display"></table>
 
   <!-- jQuery + DataTables + Responsive -->
@@ -28,10 +40,12 @@
   <script>
     Papa.parse('ReportUpcomingWeekVolEmail.txt', {
       download: true,
-      header: false,       // ignore file headers
-      delimiter: ",",      // 👈 force comma (change to "\t" if tab-delimited)
+      header: false,
+      delimiter: ",",
       skipEmptyLines: true,
       complete: function(results) {
+        document.getElementById("loading").remove(); // ✅ hide loading once parsed
+
         let data = results.data;
 
         if (data.length === 0) {
@@ -60,34 +74,32 @@
           return obj;
         });
 
-        const columns = headers.map(h => ({ title: h, data: h }));
-
-        // 👇 Custom filter for dd/mm/yyyy
-        $.fn.dataTable.ext.search.push(function(settings, rowData) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); // midnight for clean comparison
-
-          const dateStr = rowData["Date"];
-          if (!dateStr) return true;
-
-          const parts = dateStr.split("/");
-          if (parts.length !== 3) return true; // keep invalid dates
-
-          const day = parseInt(parts[0], 10);
-          const month = parseInt(parts[1], 10) - 1; // months are 0-based
-          const year = parseInt(parts[2], 10);
-
-          const bookingDate = new Date(year, month, day);
-
-          if (isNaN(bookingDate)) return true; // keep invalid
-          return bookingDate >= today;
-        });
+        const columns = headers.map(h => ({
+          title: h,
+          data: h,
+          className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
+        }));
 
         const table = $('#bookings').DataTable({
           data: data,
           columns: columns,
           pageLength: 25,
-          responsive: true,
+
+          // ✅ Improvement 5: Responsive details
+          responsive: {
+            details: {
+              type: 'column',
+              target: 'tr'
+            }
+          },
+
+          // ✅ Improvement 6: Friendly empty message
+          language: {
+            emptyTable: "No bookings match your filters",
+            loadingRecords: "Loading bookings…",
+            zeroRecords: "No matching bookings found"
+          },
+
           order: [
             [headers.indexOf("Date"), 'asc'],
             [headers.indexOf("From"), 'asc'],
