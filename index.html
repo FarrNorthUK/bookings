@@ -4,9 +4,17 @@
   <meta charset="UTF-8">
   <title>Car Bookings</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- jQuery CDN with integrity check -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <!-- Fallback for jQuery if CDN fails -->
+  <script>window.jQuery || document.write('<script src="js/jquery-3.7.1.min.js"><\/script>');</script>
+  <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/jquery.dataTables.min.css">
+  <!-- DataTables JS with integrity check -->
   <script src="https://cdn.datatables.net/2.1.8/js/jquery.dataTables.min.js" integrity="sha256-1f4MDD2bF9X7NHF/n0V+0lHPBtzN7+3lK+NDY8E8A8M=" crossorigin="anonymous"></script>
+  <!-- Fallback for DataTables if CDN fails -->
+  <script>window.jQuery.fn.DataTable || document.write('<script src="js/jquery.dataTables.min.js"><\/script>');</script>
+  <!-- PapaParse for CSV parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     body {
@@ -285,8 +293,8 @@
 
     function initDataTable() {
       try {
-        if (!$.fn.DataTable) {
-          throw new Error('DataTables is not loaded');
+        if (!window.jQuery || !$.fn.DataTable) {
+          throw new Error('DataTables or jQuery is not loaded');
         }
         if (dataTable) {
           dataTable.destroy();
@@ -333,7 +341,7 @@
         return true;
       } catch (error) {
         console.error('Error initializing DataTable:', error);
-        showError('DataTable Error', `Failed to initialize table: ${error.message}`);
+        showError('DataTable Error', `Failed to initialize table: ${error.message}. Please check your network or CDN.`);
         return false;
       }
     }
@@ -413,8 +421,14 @@
         });
     }
 
+    // Wait for document and libraries to load
     $(document).ready(function() {
-      if (typeof $.fn.DataTable === 'undefined') {
+      if (!window.jQuery) {
+        console.error('jQuery not loaded');
+        showError('jQuery Error', 'jQuery library failed to load. Please check your network or CDN.');
+        return;
+      }
+      if (!$.fn.DataTable) {
         console.error('DataTables not loaded');
         showError('DataTable Error', 'DataTables library failed to load. Please check your network or CDN.');
         return;
