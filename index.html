@@ -40,7 +40,7 @@
   <script>
     Papa.parse('ReportUpcomingWeekVolEmail.txt', {
       download: true,
-      header: true,
+      header: false,
       delimiter: ",",
       skipEmptyLines: true,
       complete: function(results) {
