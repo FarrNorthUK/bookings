@@ -1,356 +1,301 @@
-<!DOCTYPE html>
+<!DOCTYPE html>  
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Car Bookings</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="js/jquery-3.7.1.min.js"><\/script>');</script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/2.1.8/js/jquery.dataTables.min.js" integrity="sha256-1f4MDD2bF9X7NHF/n0V+0lHPBtzN7+3lK+NDY8E8A8M=" crossorigin="anonymous"></script>
-    <script>window.jQuery.fn.DataTable || document.write('<script src="js/jquery.dataTables.min.js"><\/script>');</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 10px;
-            max-width: 100%;
-            overflow-x: auto;
-        }
-        h1 { margin-bottom: 20px; }
-    
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-    
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0;
-        }
-    
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-            vertical-align: middle;
-        }
-    
-        th {
-            background-color: #f5f5f5;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-    
-        tbody tr:nth-child(odd) {
-            background-color: #f9f9f9;
-        }
-    
-        tbody tr:hover {
-            background-color: #f0f8ff;
-        }
-    
-        .center {
-            text-align: center;
-        }
-    
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 40px 0;
-        }
-    
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-    
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    
-        .loading-text {
-            color: #666;
-            font-size: 16px;
-        }
-    
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            border-radius: 4px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-    
-        .footer {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-            text-align: center;
-            color: #6c757d;
-            font-size: 14px;
-        }
-    
-        .info-bar {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-    
-        .dataTables_wrapper .dataTables_filter {
-            margin-bottom: 15px;
-        }
-        .dataTables_wrapper .dataTables_length {
-            margin-bottom: 15px;
-        }
-        .dataTables_wrapper .dataTables_paginate {
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Car Bookings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { margin-bottom: 20px; }
+    table { width: 100%; }
+    /* ✅ Improvement 3: Better readability */
+    table.dataTable tbody tr:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+    table.dataTable tbody td {
+      vertical-align: middle;
+    }
+    .dt-body-center {
+      text-align: center;
+    }
+
+    /* ✅ Improvement 4: Sophisticated loading indicator */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 40px 0;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .error-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .retry-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .retry-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <h1>Car Bookings</h1>
-    <div id="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Loading car bookings...</div>
-    </div>
-    <div id="error-container" style="display: none;"></div>
-    <div id="main-content" style="display: none;">
-        <div class="table-container">
-            <table id="bookings" class="display">
-                <thead>
-                    <tr>
-                        <th>Date 📅</th>
-                        <th>Day</th>
-                        <th>From</th>
-                        <th>To</th>
-                        <th class="center">Setoff</th>
-                        <th class="center">Pickup</th>
-                        <th class="center">Arrive</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody id="bookings-body">
-                </tbody>
-            </table>
+  <h1>Car Bookings</h1>
+
+  <!-- ✅ Improvement 4: Enhanced loading indicator -->
+  <div id="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading car bookings...</div>
+  </div>
+
+  <!-- ✅ Improvement 1: Error handling UI -->
+  <div id="error-container" style="display: none;"></div>
+
+  <table id="bookings" class="display" style="display: none;"></table>
+
+  <!-- jQuery + DataTables + Responsive -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script>
+    function showError(title, message, showRetry = true) {
+      const errorContainer = document.getElementById("error-container");
+      errorContainer.innerHTML = `
+        <div class="error-message">
+          <div class="error-title">${title}</div>
+          <div>${message}</div>
+          ${showRetry ? '<button class="retry-button" onclick="loadBookings()">Try Again</button>' : ''}
         </div>
-    </div>
-    <footer id="footer" class="footer" style="display: none;">
-        <p>Last updated: <span id="last-updated-time"></span></p>
-    </footer>
-    <script>
-        let allBookings = [];
-        let dataTable = null;
+      `;
+      errorContainer.style.display = 'block';
+      document.getElementById("loading").style.display = 'none';
+    }
 
-        function parseDate(dateStr) {
-            if (!dateStr || !dateStr.trim()) return null;
-            const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (ddmmyyyy) {
-                const day = parseInt(ddmmyyyy[1], 10);
-                const month = parseInt(ddmmyyyy[2], 10) - 1;
-                const year = parseInt(ddmmyyyy[3], 10);
-                return new Date(year, month, day);
+    function hideError() {
+      document.getElementById("error-container").style.display = 'none';
+    }
+
+    function showLoading() {
+      document.getElementById("loading").style.display = 'flex';
+      document.getElementById("bookings").style.display = 'none';
+      document.getElementById("footer").style.display = 'none';
+      hideError();
+    }
+
+    function hideLoading() {
+      document.getElementById("loading").style.display = 'none';
+      document.getElementById("bookings").style.display = 'table';
+    }
+
+    function loadBookings() {
+      showLoading();
+
+      Papa.parse('ReportUpcomingWeekVolEmail.txt', {
+        download: true,
+        header: false,
+        delimiter: ",",
+        skipEmptyLines: true,
+        complete: function(results) {
+          try {
+            // ✅ Improvement 1: Check for parsing errors
+            if (results.errors && results.errors.length > 0) {
+              const errorMessages = results.errors.map(error => error.message).join(', ');
+              showError(
+                'Data Parsing Error',
+                `There were issues parsing the booking data: ${errorMessages}`
+              );
+              return;
             }
-            return null;
-        }
 
-        function formatDateForDisplay(dateStr) {
-            const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (ddmmyyyy) {
-                return `${ddmmyyyy[1]}/${ddmmyyyy[2]}`;
+            let data = results.data;
+
+            if (!data || data.length === 0) {
+              hideLoading();
+              document.querySelector("body").insertAdjacentHTML(
+                "beforeend",
+                "<p><em>No bookings found in the file.</em></p>"
+              );
+              return;
             }
-            return dateStr;
-        }
 
-        function updateLastUpdatedTime() {
-            const timeElement = document.getElementById("last-updated-time");
-            if (timeElement) {
-                const now = new Date();
-                const timeString = now.toLocaleString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
-                });
-                timeElement.textContent = timeString;
+            const headers = [
+              "Date",
+              "Day",
+              "From",
+              "To",
+              "Setoff",
+              "Pickup",
+              "Arrive",
+              "Type"
+            ];
+
+            // ✅ Improvement 1: Validate data structure
+            const maxColumns = Math.max(...data.map(row => row.length));
+            if (maxColumns > headers.length) {
+              console.warn(`Data has ${maxColumns} columns but only ${headers.length} headers defined`);
             }
-        }
 
-        function showError(title, message) {
-            const errorContainer = document.getElementById("error-container");
-            if (errorContainer) {
-                errorContainer.innerHTML = `<div class="error-message"><strong>${title}:</strong> ${message}</div>`;
-                errorContainer.style.display = 'block';
-            }
-            hideLoading();
-        }
+            data = data.map((row, index) => {
+              let obj = {};
+              headers.forEach((h, i) => {
+                obj[h] = row[i] ?? "";
+              });
 
-        function hideLoading() {
-            const elements = ['loading', 'main-content', 'footer'];
-            elements.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.style.display = id === 'loading' ? 'none' : 'block';
+              // ✅ Improvement 1: Validate date format
+              if (obj["Date"] && obj["Date"].trim()) {
+                const dateTest = new Date(obj["Date"]);
+                if (isNaN(dateTest.getTime())) {
+                  console.warn(`Invalid date format in row ${index + 1}: "${obj["Date"]}"`);
                 }
+              }
+
+              return obj;
             });
-            updateLastUpdatedTime();
+
+            const columns = headers.map(h => ({
+              title: h,
+              data: h,
+              type: h === "Date" ? "date" : undefined,
+              className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
+            }));
+
+            // ✅ Custom filter: hide rows where Date < today
+            $.fn.dataTable.ext.search.push(function(settings, rowData) {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0); // midnight
+              const bookingDate = new Date(rowData["Date"]);
+              if (isNaN(bookingDate)) return true; // keep rows with invalid dates
+              return bookingDate >= today;
+            });
+
+            // ✅ Register custom date sorting for dd/mm format (but sort by full date)
+            $.fn.dataTable.ext.type.order['date-uk-pre'] = function (d) {
+              // We need to reconstruct the full date for proper sorting
+              // Assume current year for dd/mm format
+              const currentYear = new Date().getFullYear();
+              const ddmm = d.match(/^(\d{1,2})\/(\d{1,2})$/);
+              if (ddmm) {
+                const day = parseInt(ddmm[1], 10);
+                const month = parseInt(ddmm[2], 10) - 1;
+                const fullDate = new Date(currentYear, month, day);
+                return fullDate.getTime();
+              }
+              return 0;
+            };
+
+            // ✅ Improvement 1: Wrap DataTable initialization in try-catch
+            const table = $('#bookings').DataTable({
+              data: data,
+              columns: columns,
+              pageLength: 25,
+              scrollX: true, // ✅ Fix: Enable horizontal scrolling
+              responsive: {
+                details: {
+                  type: 'column',
+                  target: 'tr'
+                }
+              },
+              columnDefs: [
+                // ✅ Fix: Make columns responsive with priorities
+                { responsivePriority: 1, targets: [0, 1] }, // Date and Day always visible
+                { responsivePriority: 2, targets: [2, 3] }, // From and To second priority
+                { responsivePriority: 3, targets: [4, 5, 6] } // Times can be hidden on small screens
+              ],
+              language: {
+                emptyTable: "No bookings match your filters",
+                loadingRecords: "Loading bookings…",
+                zeroRecords: "No matching bookings found"
+              },
+              order: [
+                [headers.indexOf("Date"), 'asc'],
+                [headers.indexOf("Arrive"), 'asc'],
+                [headers.indexOf("Pickup"), 'asc'],
+                [headers.indexOf("Setoff"), 'asc']
+              ]
+            });
+
+            table.draw();
+            hideLoading();
+
+          } catch (error) {
+            console.error('Error processing booking data:', error);
+            showError(
+              'Processing Error',
+              `An error occurred while processing the booking data: ${error.message}`
+            );
+          }
+        },
+
+        // ✅ Improvement 1: Handle Papa Parse errors
+        error: function(error) {
+          console.error('Papa Parse error:', error);
+          showError(
+            'File Loading Error',
+            'Could not load the booking data file. Please check that "ReportUpcomingWeekVolEmail.txt" exists and is accessible.'
+          );
         }
+      });
+    }
 
-        // Custom sorting for time strings (e.g., "14:00")
-        $.extend($.fn.dataTableExt.oSort, {
-            "time-hhmm-pre": function (a) {
-                if (a === null || a === '') {
-                    return 0;
-                }
-                const parts = a.split(':');
-                return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-            },
-            "time-hhmm-asc": function (a, b) {
-                return a - b;
-            },
-            "time-hhmm-desc": function (a, b) {
-                return b - a;
-            }
-        });
+    // ✅ Improvement 1: Handle network/file loading errors with timeout
+    setTimeout(() => {
+      const loadingElement = document.getElementById("loading");
+      if (loadingElement && loadingElement.style.display !== 'none') {
+        showError(
+          'Loading Timeout',
+          'The booking data is taking longer than expected to load. This might be due to a network issue or the file being unavailable.'
+        );
+      }
+    }, 10000); // 10 second timeout
 
-        // Custom sorting for dates in 'dd/mm' format
-        $.extend($.fn.dataTableExt.oSort, {
-            "dd-mm-pre": function (a) {
-                if (a === null || a === '') {
-                    return 0;
-                }
-                const parts = a.split('/');
-                return parseInt(parts[1], 10) * 100 + parseInt(parts[0], 10);
-            },
-            "dd-mm-asc": function (a, b) {
-                return a - b;
-            },
-            "dd-mm-desc": function (a, b) {
-                return b - a;
-            }
-        });
-
-        function initDataTable() {
-            try {
-                if (!window.jQuery || !$.fn.DataTable) {
-                    throw new Error('DataTables or jQuery is not loaded');
-                }
-                if (dataTable) {
-                    dataTable.destroy();
-                }
-                dataTable = $('#bookings').DataTable({
-                    data: allBookings,
-                    columns: [
-                        { data: 'Date', type: 'dd-mm' },
-                        { data: 'Day' },
-                        { data: 'From' },
-                        { data: 'To' },
-                        { data: 'Setoff', className: 'center', type: 'time-hhmm' },
-                        { data: 'Pickup', className: 'center', type: 'time-hhmm' },
-                        { data: 'Arrive', className: 'center', type: 'time-hhmm' },
-                        { data: 'Type' }
-                    ],
-                    pageLength: 10,
-                    order: [[0, 'asc']],
-                    searching: true,
-                    paging: true,
-                    info: true
-                });
-                return true;
-            } catch (error) {
-                console.error('Error initializing DataTable:', error);
-                showError('DataTable Error', `Failed to initialize table: ${error.message}. Please check your network or CDN.`);
-                return false;
-            }
-        }
-
-        function loadBookings() {
-            console.log('Loading bookings from ReportUpcomingWeekVolEmail.txt...');
-            fetch('ReportUpcomingWeekVolEmail.txt')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    try {
-                        const results = Papa.parse(data, {
-                            header: false,
-                            delimiter: ",",
-                            skipEmptyLines: true
-                        });
-                        if (!results.data || results.data.length === 0) {
-                            showError('No Data', 'No booking data available in ReportUpcomingWeekVolEmail.txt.');
-                            return;
-                        }
-                        const headers = ["Date", "Day", "From", "To", "Setoff", "Pickup", "Arrive", "Type"];
-                        allBookings = results.data.map(row => {
-                            const booking = {};
-                            headers.forEach((header, i) => {
-                                if (header === "Date") {
-                                    booking.originalDate = row[i] || "";
-                                    booking[header] = formatDateForDisplay(row[i] || "");
-                                } else {
-                                    booking[header] = row[i] || "";
-                                }
-                            });
-                            return booking;
-                        });
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        allBookings = allBookings.filter(booking => {
-                            const bookingDate = parseDate(booking.originalDate);
-                            return !bookingDate || bookingDate >= today;
-                        });
-                        console.log(`Loaded ${allBookings.length} future bookings`);
-                        if (initDataTable()) {
-                            hideLoading();
-                        }
-                    } catch (error) {
-                        console.error('Error parsing bookings:', error);
-                        showError('Parsing Error', `Failed to parse booking data: ${error.message}`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching ReportUpcomingWeekVolEmail.txt:', error);
-                    showError('Fetch Error', `Failed to load ReportUpcomingWeekVolEmail.txt: ${error.message}. Please ensure the file exists and is accessible.`);
-                });
-        }
-
-        // Wait for document and libraries to load
-        $(document).ready(function() {
-            if (!window.jQuery) {
-                console.error('jQuery not loaded');
-                showError('jQuery Error', 'jQuery library failed to load. Please check your network or CDN.');
-                return;
-            }
-            if (!$.fn.DataTable) {
-                console.error('DataTables not loaded');
-                showError('DataTable Error', 'DataTables library failed to load. Please check your network or CDN.');
-                return;
-            }
-            loadBookings();
-        });
-    </script>
+    // Start loading when page loads (ensure DOM is ready)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadBookings);
+    } else {
+      loadBookings();
+    }
+  </script>
 </body>
 </html>
