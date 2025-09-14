@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -34,7 +34,6 @@
       complete: function(results) {
         let data = results.data;
 
-        // If no data, show a message instead of empty table
         if (data.length === 0) {
           document.querySelector("body").insertAdjacentHTML(
             "beforeend",
@@ -43,7 +42,6 @@
           return;
         }
 
-        // Define your own headers (must match the CSV column order)
         const headers = [
           "Date",
           "Day",
@@ -54,7 +52,6 @@
           "Arrive"
         ];
 
-        // Map rows → objects with your headers
         data = data.map(row => {
           let obj = {};
           headers.forEach((h, i) => {
@@ -63,21 +60,42 @@
           return obj;
         });
 
-        // Build DataTables columns
         const columns = headers.map(h => ({ title: h, data: h }));
 
-        // Initialize DataTable with name-based sorting
-        $('#bookings').DataTable({
+        // 👇 Custom filter for dd/mm/yyyy
+        $.fn.dataTable.ext.search.push(function(settings, rowData) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // midnight for clean comparison
+
+          const dateStr = rowData["Date"];
+          if (!dateStr) return true;
+
+          const parts = dateStr.split("/");
+          if (parts.length !== 3) return true; // keep invalid dates
+
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1; // months are 0-based
+          const year = parseInt(parts[2], 10);
+
+          const bookingDate = new Date(year, month, day);
+
+          if (isNaN(bookingDate)) return true; // keep invalid
+          return bookingDate >= today;
+        });
+
+        const table = $('#bookings').DataTable({
           data: data,
           columns: columns,
           pageLength: 25,
           responsive: true,
           order: [
-            [headers.indexOf("CarID"), 'asc'],
-            [headers.indexOf("PickupDate"), 'asc'],
-            [headers.indexOf("PickupTime"), 'asc']
+            [headers.indexOf("Date"), 'asc'],
+            [headers.indexOf("From"), 'asc'],
+            [headers.indexOf("Pickup"), 'asc']
           ]
         });
+
+        table.draw();
       }
     });
   </script>
