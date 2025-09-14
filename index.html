@@ -120,7 +120,6 @@
     function showLoading() {
       document.getElementById("loading").style.display = 'flex';
       document.getElementById("bookings").style.display = 'none';
-      document.getElementById("footer").style.display = 'none';
       hideError();
     }
 
@@ -167,8 +166,7 @@
               "To",
               "Setoff",
               "Pickup",
-              "Arrive",
-              "Type"
+              "Arrive"
             ];
 
             // ✅ Improvement 1: Validate data structure
@@ -281,8 +279,7 @@
 
     // ✅ Improvement 1: Handle network/file loading errors with timeout
     setTimeout(() => {
-      const loadingElement = document.getElementById("loading");
-      if (loadingElement && loadingElement.style.display !== 'none') {
+      if (document.getElementById("loading").style.display !== 'none') {
         showError(
           'Loading Timeout',
           'The booking data is taking longer than expected to load. This might be due to a network issue or the file being unavailable.'
@@ -290,12 +287,8 @@
       }
     }, 10000); // 10 second timeout
 
-    // Start loading when page loads (ensure DOM is ready)
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', loadBookings);
-    } else {
-      loadBookings();
-    }
+    // Start loading when page loads
+    loadBookings();
   </script>
 </body>
 </html>
