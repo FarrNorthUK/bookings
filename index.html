@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>  
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -28,7 +28,7 @@
 </head>
 <body>
   <h1>Car Bookings</h1>
-  <p id="loading">Loading bookings…</p> <!-- ✅ Improvement 6: Loading feedback -->
+  <p id="loading">Loading bookings…</p>
   <table id="bookings" class="display"></table>
 
   <!-- jQuery + DataTables + Responsive -->
@@ -44,7 +44,7 @@
       delimiter: ",",
       skipEmptyLines: true,
       complete: function(results) {
-        document.getElementById("loading").remove(); // ✅ hide loading once parsed
+        document.getElementById("loading").remove();
 
         let data = results.data;
 
@@ -77,29 +77,35 @@
         const columns = headers.map(h => ({
           title: h,
           data: h,
+          type: h === "Date" ? "date" : undefined,
           className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
         }));
+
+        // ✅ Custom filter: hide rows where Date < today
+        $.fn.dataTable.ext.search.push(function(settings, rowData) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // midnight
+
+          const bookingDate = new Date(rowData["Date"]);
+          if (isNaN(bookingDate)) return true; // keep rows with invalid dates
+          return bookingDate >= today;
+        });
 
         const table = $('#bookings').DataTable({
           data: data,
           columns: columns,
           pageLength: 25,
-
-          // ✅ Improvement 5: Responsive details
           responsive: {
             details: {
               type: 'column',
               target: 'tr'
             }
           },
-
-          // ✅ Improvement 6: Friendly empty message
           language: {
             emptyTable: "No bookings match your filters",
             loadingRecords: "Loading bookings…",
             zeroRecords: "No matching bookings found"
           },
-
           order: [
             [headers.indexOf("Date"), 'asc'],
             [headers.indexOf("From"), 'asc'],
