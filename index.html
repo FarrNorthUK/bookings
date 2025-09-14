@@ -1,38 +1,41 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Car Bookings</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/jquery.dataTables.min.css">
+  <script src="https://cdn.datatables.net/2.1.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 10px; 
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
       max-width: 100%;
       overflow-x: auto;
     }
     h1 { margin-bottom: 20px; }
-    
-    /* ✅ Simple table styling */
+   
     .table-container {
       width: 100%;
       overflow-x: auto;
       margin-bottom: 20px;
     }
-    
-    table { 
+   
+    table {
       width: 100%;
       border-collapse: collapse;
       margin: 0;
     }
-    
+   
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
       vertical-align: middle;
     }
-    
+   
     th {
       background-color: #f5f5f5;
       font-weight: bold;
@@ -40,20 +43,19 @@
       top: 0;
       z-index: 10;
     }
-    
+   
     tbody tr:nth-child(odd) {
       background-color: #f9f9f9;
     }
-    
+   
     tbody tr:hover {
       background-color: #f0f8ff;
     }
-    
+   
     .center {
       text-align: center;
     }
-    
-    /* ✅ Controls styling */
+   
     .controls {
       margin-bottom: 20px;
       display: flex;
@@ -61,20 +63,20 @@
       gap: 15px;
       align-items: center;
     }
-    
+   
     .search-box, .filter-buttons {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    
+   
     input[type="text"] {
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 14px;
     }
-    
+   
     button {
       padding: 8px 16px;
       border: 1px solid #ddd;
@@ -83,18 +85,17 @@
       cursor: pointer;
       font-size: 14px;
     }
-    
+   
     button:hover {
       background: #e9ecef;
     }
-    
+   
     button.active {
       background: #007bff;
       color: white;
       border-color: #007bff;
     }
-    
-    /* ✅ Mobile responsive styles */
+   
     @media (max-width: 768px) {
       body { margin: 5px; }
       h1 { font-size: 1.5em; }
@@ -102,21 +103,20 @@
       .controls { flex-direction: column; align-items: stretch; }
       .search-box, .filter-buttons { justify-content: center; }
     }
-    
+   
     @media (max-width: 480px) {
       body { margin: 2px; }
       h1 { font-size: 1.3em; }
       th, td { padding: 4px 2px; font-size: 12px; }
     }
-    
-    /* ✅ Loading and error styles */
+   
     .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin: 40px 0;
     }
-    
+   
     .loading-spinner {
       width: 40px;
       height: 40px;
@@ -126,17 +126,17 @@
       animation: spin 1s linear infinite;
       margin-bottom: 15px;
     }
-    
+   
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    
+   
     .loading-text {
       color: #666;
       font-size: 16px;
     }
-    
+   
     .error-message {
       background-color: #f8d7da;
       color: #721c24;
@@ -145,7 +145,7 @@
       padding: 15px;
       margin: 20px 0;
     }
-    
+   
     .footer {
       margin-top: 30px;
       padding: 15px;
@@ -155,7 +155,7 @@
       color: #6c757d;
       font-size: 14px;
     }
-    
+   
     .info-bar {
       background: #d4edda;
       border: 1px solid #c3e6cb;
@@ -164,27 +164,37 @@
       border-radius: 4px;
       margin-bottom: 15px;
     }
+   
+    .dataTables_wrapper .dataTables_filter {
+      margin-bottom: 15px;
+    }
+    .dataTables_wrapper .dataTables_length {
+      margin-bottom: 15px;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>Car Bookings</h1>
-  
+ 
   <div id="loading" class="loading-container">
     <div class="loading-spinner"></div>
     <div class="loading-text">Loading car bookings...</div>
   </div>
-  
+ 
   <div id="error-container" style="display: none;"></div>
-  
+ 
   <div id="main-content" style="display: none;">
     <div class="info-bar">
-      <strong>📊 Simple Table Mode:</strong> Showing all future bookings. Use the search box to filter results.
+      <strong>📊 DataTables Mode:</strong> Showing all future bookings. Use the search box or filters to refine results.
     </div>
-    
+   
     <div class="controls">
       <div class="search-box">
         <label for="search">Search:</label>
-        <input type="text" id="search" placeholder="Search bookings..." onkeyup="filterTable()">
+        <input type="text" id="search" placeholder="Search bookings...">
       </div>
       <div class="filter-buttons">
         <button onclick="filterByDate('all')" class="active" id="btn-all">All</button>
@@ -192,18 +202,18 @@
         <button onclick="filterByDate('week')" id="btn-week">This Week</button>
       </div>
     </div>
-    
+   
     <div class="table-container">
-      <table id="bookings">
+      <table id="bookings" class="display">
         <thead>
           <tr>
-            <th onclick="sortTable(0)">Date 📅</th>
-            <th onclick="sortTable(1)">Day</th>
-            <th onclick="sortTable(2)">From</th>
-            <th onclick="sortTable(3)">To</th>
-            <th onclick="sortTable(4)" class="center">Setoff</th>
-            <th onclick="sortTable(5)" class="center">Pickup</th>
-            <th onclick="sortTable(6)" class="center">Arrive</th>
+            <th>Date 📅</th>
+            <th>Day</th>
+            <th>From</th>
+            <th>To</th>
+            <th class="center">Setoff</th>
+            <th class="center">Pickup</th>
+            <th class="center">Arrive</th>
           </tr>
         </thead>
         <tbody id="bookings-body">
@@ -211,34 +221,14 @@
       </table>
     </div>
   </div>
-  
+ 
   <footer id="footer" class="footer" style="display: none;">
     <p>Last updated: <span id="last-updated-time"></span></p>
   </footer>
-  
-  <!-- Only load PapaParse -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+ 
   <script>
-    // ✅ Test data embedded directly
-    const testData = `15/09/2025,Monday,London,Birmingham,08:00,08:30,10:15
-16/09/2025,Tuesday,Manchester,Leeds,07:30,08:00,10:30
-17/09/2025,Wednesday,London,Oxford,09:15,09:45,11:30
-18/09/2025,Thursday,Brighton,London,08:45,09:15,11:45
-19/09/2025,Friday,Cambridge,Norwich,10:00,10:30,12:15
-20/09/2025,Saturday,London,Bath,09:00,09:30,12:00
-21/09/2025,Sunday,Bristol,Cardiff,10:30,11:00,12:45
-22/09/2025,Monday,London,Reading,07:45,08:15,09:30
-23/09/2025,Tuesday,Swindon,Gloucester,08:30,09:00,10:45
-24/09/2025,Wednesday,Birmingham,Coventry,07:15,07:45,08:30
-25/09/2025,Thursday,Leicester,Nottingham,11:45,12:15,13:30
-26/09/2025,Friday,Sheffield,Leeds,08:00,08:30,09:45
-27/09/2025,Saturday,York,Hull,13:00,13:30,15:00
-28/09/2025,Sunday,Lincoln,Peterborough,09:30,10:00,11:45
-29/09/2025,Monday,London,Luton,06:45,07:15,08:00
-30/09/2025,Tuesday,Milton Keynes,Northampton,11:30,12:00,12:45`;
-
     let allBookings = [];
-    let currentSort = { column: 0, ascending: true };
+    let dataTable = null;
     let currentFilter = 'all';
 
     function parseDate(dateStr) {
@@ -267,7 +257,7 @@
         const now = new Date();
         const timeString = now.toLocaleString('en-GB', {
           day: '2-digit',
-          month: '2-digit', 
+          month: '2-digit',
           year: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
@@ -292,193 +282,149 @@
       elements.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.style.display = id === 'loading' ? 'none' : 
+          el.style.display = id === 'loading' ? 'none' :
                             id === 'main-content' ? 'block' : 'block';
         }
       });
       updateLastUpdatedTime();
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('bookings-body');
-      if (!tbody) return;
-
-      let filteredBookings = [...allBookings];
-      
-      // Apply date filter
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (currentFilter === 'today') {
-        filteredBookings = filteredBookings.filter(booking => {
-          const bookingDate = parseDate(booking.originalDate);
-          return bookingDate && bookingDate.toDateString() === today.toDateString();
-        });
-      } else if (currentFilter === 'week') {
-        const weekFromNow = new Date(today);
-        weekFromNow.setDate(today.getDate() + 7);
-        filteredBookings = filteredBookings.filter(booking => {
-          const bookingDate = parseDate(booking.originalDate);
-          return bookingDate && bookingDate >= today && bookingDate <= weekFromNow;
-        });
-      }
-
-      // Apply search filter
-      const searchTerm = document.getElementById('search')?.value.toLowerCase() || '';
-      if (searchTerm) {
-        filteredBookings = filteredBookings.filter(booking => 
-          Object.values(booking).some(value => 
-            value.toString().toLowerCase().includes(searchTerm)
-          )
-        );
-      }
-
-      // Sort bookings
-      filteredBookings.sort((a, b) => {
-        const keys = ['Date', 'Day', 'From', 'To', 'Setoff', 'Pickup', 'Arrive'];
-        const key = keys[currentSort.column];
-        
-        let aVal = a[key] || '';
-        let bVal = b[key] || '';
-        
-        // Special handling for date sorting
-        if (key === 'Date') {
-          const aDate = parseDate(a.originalDate);
-          const bDate = parseDate(b.originalDate);
-          if (aDate && bDate) {
-            return currentSort.ascending ? aDate - bDate : bDate - aDate;
-          }
+    function initDataTable() {
+      try {
+        if (dataTable) {
+          dataTable.destroy();
         }
-        
-        // String comparison
-        if (aVal < bVal) return currentSort.ascending ? -1 : 1;
-        if (aVal > bVal) return currentSort.ascending ? 1 : -1;
-        return 0;
-      });
 
-      // Render rows
-      tbody.innerHTML = filteredBookings.map(booking => `
-        <tr>
-          <td>${booking.Date}</td>
-          <td>${booking.Day}</td>
-          <td>${booking.From}</td>
-          <td>${booking.To}</td>
-          <td class="center">${booking.Setoff}</td>
-          <td class="center">${booking.Pickup}</td>
-          <td class="center">${booking.Arrive}</td>
-        </tr>
-      `).join('');
+        dataTable = $('#bookings').DataTable({
+          data: allBookings,
+          columns: [
+            { data: 'Date' },
+            { data: 'Day' },
+            { data: 'From' },
+            { data: 'To' },
+            { data: 'Setoff', className: 'center' },
+            { data: 'Pickup', className: 'center' },
+            { data: 'Arrive', className: 'center' },
+            { data: 'Type' }
+            
+          ],
+          pageLength: 10,
+          order: [[0, 'asc']],
+          searching: true,
+          paging: true,
+          info: true,
+          language: {
+            info: 'Showing _START_ to _END_ of _TOTAL_ bookings',
+            infoFiltered: '(filtered from _MAX_ total bookings)'
+          }
+        });
 
-      // Update info
-      const infoBar = document.querySelector('.info-bar');
-      if (infoBar) {
-        const total = allBookings.length;
-        const showing = filteredBookings.length;
-        infoBar.innerHTML = `<strong>📊 Simple Table Mode:</strong> Showing ${showing} of ${total} future bookings.`;
+        $.fn.dataTable.ext.search.push((settings, data, dataIndex) => {
+          const bookingDate = parseDate(allBookings[dataIndex].originalDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (currentFilter === 'today') {
+            return bookingDate && bookingDate.toDateString() === today.toDateString();
+          } else if (currentFilter === 'week') {
+            const weekFromNow = new Date(today);
+            weekFromNow.setDate(today.getDate() + 7);
+            return bookingDate && bookingDate >= today && bookingDate <= weekFromNow;
+          }
+          return true;
+        });
+
+        $('#search').on('keyup', function() {
+          dataTable.search(this.value).draw();
+        });
+
+        updateInfoBar();
+        return true;
+      } catch (error) {
+        console.error('Error initializing DataTable:', error);
+        showError('DataTable Error', `Failed to initialize table: ${error.message}`);
+        return false;
       }
-    }
-
-    function sortTable(columnIndex) {
-      if (currentSort.column === columnIndex) {
-        currentSort.ascending = !currentSort.ascending;
-      } else {
-        currentSort.column = columnIndex;
-        currentSort.ascending = true;
-      }
-      renderTable();
     }
 
     function filterByDate(filter) {
       currentFilter = filter;
-      
-      // Update button states
       document.querySelectorAll('.filter-buttons button').forEach(btn => {
         btn.classList.remove('active');
       });
       document.getElementById(`btn-${filter}`).classList.add('active');
-      
-      renderTable();
+      if (dataTable) {
+        dataTable.draw();
+        updateInfoBar();
+      }
     }
 
-    function filterTable() {
-      renderTable();
+    function updateInfoBar() {
+      const infoBar = document.querySelector('.info-bar');
+      if (infoBar && dataTable) {
+        const total = allBookings.length;
+        const showing = dataTable.rows({ filter: 'applied' }).count();
+        infoBar.innerHTML = `<strong>📊 DataTables Mode:</strong> Showing ${showing} of ${total} future bookings.`;
+      }
     }
 
     function loadBookings() {
-      console.log('Loading bookings with DataTables...');
-      
-      // Wait for libraries to load
-      let attempts = 0;
-      const maxAttempts = 50;
-      
-      function checkLibraries() {
-        attempts++;
-        
-        if (typeof $ !== 'undefined' && typeof $.fn.DataTable !== 'undefined' && typeof Papa !== 'undefined') {
-          console.log('✅ All libraries loaded successfully');
-          processData();
-        } else if (attempts < maxAttempts) {
-          console.log(`Waiting for libraries... attempt ${attempts}`);
-          setTimeout(checkLibraries, 100);
-        } else {
-          console.error('❌ Library loading timeout');
-          showError('Library Error', 'DataTables or other required libraries failed to load. Please refresh the page.');
-        }
-      }
-      
-      function processData() {
-        try {
-          const results = Papa.parse(testData, {
-            header: false,
-            delimiter: ",",
-            skipEmptyLines: true
-          });
-
-          if (!results.data || results.data.length === 0) {
-            showError('No Data', 'No booking data available.');
-            return;
+      console.log('Loading bookings from bookings.txt...');
+      fetch('ReportUpcomingWeekVolEmail.txt')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
           }
-
-          const headers = ["Date", "Day", "From", "To", "Setoff", "Pickup", "Arrive"];
-          
-          allBookings = results.data.map(row => {
-            const booking = {};
-            headers.forEach((header, i) => {
-              if (header === "Date") {
-                booking.originalDate = row[i] || "";
-                booking[header] = formatDateForDisplay(row[i] || "");
-              } else {
-                booking[header] = row[i] || "";
-              }
+          return response.text();
+        })
+        .then(data => {
+          try {
+            const results = Papa.parse(data, {
+              header: false,
+              delimiter: ",",
+              skipEmptyLines: true
             });
-            return booking;
-          });
 
-          // Filter out past bookings
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          allBookings = allBookings.filter(booking => {
-            const bookingDate = parseDate(booking.originalDate);
-            return !bookingDate || bookingDate >= today;
-          });
+            if (!results.data || results.data.length === 0) {
+              showError('No Data', 'No booking data available in bookings.txt.');
+              return;
+            }
 
-          console.log(`Loaded ${allBookings.length} future bookings`);
-          
-          if (initDataTable()) {
-            hideLoading();
-            updateInfoBar();
+            const headers = ["Date", "Day", "From", "To", "Setoff", "Pickup", "Arrive", "Type"];
+            allBookings = results.data.map(row => {
+              const booking = {};
+              headers.forEach((header, i) => {
+                if (header === "Date") {
+                  booking.originalDate = row[i] || "";
+                  booking[header] = formatDateForDisplay(row[i] || "");
+                } else {
+                  booking[header] = row[i] || "";
+                }
+              });
+              return booking;
+            });
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            allBookings = allBookings.filter(booking => {
+              const bookingDate = parseDate(booking.originalDate);
+              return !bookingDate || bookingDate >= today;
+            });
+
+            console.log(`Loaded ${allBookings.length} future bookings`);
+            if (initDataTable()) {
+              hideLoading();
+            }
+          } catch (error) {
+            console.error('Error parsing bookings:', error);
+            showError('Parsing Error', `Failed to parse booking data: ${error.message}`);
           }
-
-        } catch (error) {
-          console.error('Error loading bookings:', error);
-          showError('Loading Error', `Failed to load booking data: ${error.message}`);
-        }
-      }
-      
-      checkLibraries();
+        })
+        .catch(error => {
+          console.error('Error fetching bookings.txt:', error);
+          showError('Fetch Error', `Failed to load bookings.txt: ${error.message}. Please ensure the file exists and is accessible.`);
+        });
     }
 
-    // Start when page loads
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', loadBookings);
     } else {
