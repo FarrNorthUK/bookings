@@ -7,6 +7,7 @@
 
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
@@ -18,46 +19,62 @@
   <h1>Car Bookings</h1>
   <table id="bookings" class="display"></table>
 
-  <!-- jQuery + DataTables -->
+  <!-- jQuery + DataTables + Responsive -->
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <script>
-    // Load CSV and build DataTable
     Papa.parse('ReportUpcomingWeekVolEmail.txt', {
       download: true,
-      header: true,
-      skipEmptyLines: true, // 👈 prevents blank row
+      header: false,       // ignore file headers
+      delimiter: ",",      // 👈 force comma (change to "\t" if tab-delimited)
+      skipEmptyLines: true,
       complete: function(results) {
         let data = results.data;
-        if (data.length === 0) return;
 
-        // Get headers directly from PapaParse
-        const headers = results.meta.fields;
+        // If no data, show a message instead of empty table
+        if (data.length === 0) {
+          document.querySelector("body").insertAdjacentHTML(
+            "beforeend",
+            "<p><em>No bookings found.</em></p>"
+          );
+          return;
+        }
 
-        // Normalize rows: ensure every row has every header key
+        // Define your own headers (must match the CSV column order)
+        const headers = [
+          "CarID",
+          "Customer",
+          "PickupDate",
+          "DropoffDate",
+          "PickupTime",
+          "DropoffTime"
+        ];
+
+        // Map rows → objects with your headers
         data = data.map(row => {
-          headers.forEach(h => {
-            if (!(h in row)) row[h] = ""; // fill missing with empty string
+          let obj = {};
+          headers.forEach((h, i) => {
+            obj[h] = row[i] ?? "";
           });
-          return row;
+          return obj;
         });
 
         // Build DataTables columns
         const columns = headers.map(h => ({ title: h, data: h }));
 
-        // Initialize DataTable
+        // Initialize DataTable with name-based sorting
         $('#bookings').DataTable({
           data: data,
           columns: columns,
           pageLength: 25,
           responsive: true,
           order: [
-            [0, 'asc'],  // sort by 1st column ascending
-            [4, 'asc'],  // sort by 5nd column ascending
-            [5, 'asc'],  // sort by 6th column ascending
-            [6, 'asc']   // then by 7th column ascending
+            [headers.indexOf("CarID"), 'asc'],
+            [headers.indexOf("PickupDate"), 'asc'],
+            [headers.indexOf("PickupTime"), 'asc']
           ]
         });
       }
