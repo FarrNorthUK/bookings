@@ -16,26 +16,26 @@
       overflow-x: auto;
     }
     h1 { margin-bottom: 20px; }
-   
+  
     .table-container {
       width: 100%;
       overflow-x: auto;
       margin-bottom: 20px;
     }
-   
+  
     table {
       width: 100%;
       border-collapse: collapse;
       margin: 0;
     }
-   
+  
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
       vertical-align: middle;
     }
-   
+  
     th {
       background-color: #f5f5f5;
       font-weight: bold;
@@ -43,19 +43,19 @@
       top: 0;
       z-index: 10;
     }
-   
+  
     tbody tr:nth-child(odd) {
       background-color: #f9f9f9;
     }
-   
+  
     tbody tr:hover {
       background-color: #f0f8ff;
     }
-   
+  
     .center {
       text-align: center;
     }
-   
+  
     .controls {
       margin-bottom: 20px;
       display: flex;
@@ -63,20 +63,20 @@
       gap: 15px;
       align-items: center;
     }
-   
+  
     .search-box, .filter-buttons {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-   
+  
     input[type="text"] {
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 14px;
     }
-   
+  
     button {
       padding: 8px 16px;
       border: 1px solid #ddd;
@@ -85,17 +85,17 @@
       cursor: pointer;
       font-size: 14px;
     }
-   
+  
     button:hover {
       background: #e9ecef;
     }
-   
+  
     button.active {
       background: #007bff;
       color: white;
       border-color: #007bff;
     }
-   
+  
     @media (max-width: 768px) {
       body { margin: 5px; }
       h1 { font-size: 1.5em; }
@@ -103,20 +103,20 @@
       .controls { flex-direction: column; align-items: stretch; }
       .search-box, .filter-buttons { justify-content: center; }
     }
-   
+  
     @media (max-width: 480px) {
       body { margin: 2px; }
       h1 { font-size: 1.3em; }
       th, td { padding: 4px 2px; font-size: 12px; }
     }
-   
+  
     .loading-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin: 40px 0;
     }
-   
+  
     .loading-spinner {
       width: 40px;
       height: 40px;
@@ -126,17 +126,17 @@
       animation: spin 1s linear infinite;
       margin-bottom: 15px;
     }
-   
+  
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-   
+  
     .loading-text {
       color: #666;
       font-size: 16px;
     }
-   
+  
     .error-message {
       background-color: #f8d7da;
       color: #721c24;
@@ -145,7 +145,7 @@
       padding: 15px;
       margin: 20px 0;
     }
-   
+  
     .footer {
       margin-top: 30px;
       padding: 15px;
@@ -155,7 +155,7 @@
       color: #6c757d;
       font-size: 14px;
     }
-   
+  
     .info-bar {
       background: #d4edda;
       border: 1px solid #c3e6cb;
@@ -164,7 +164,7 @@
       border-radius: 4px;
       margin-bottom: 15px;
     }
-   
+  
     .dataTables_wrapper .dataTables_filter {
       margin-bottom: 15px;
     }
@@ -178,19 +178,15 @@
 </head>
 <body>
   <h1>Car Bookings</h1>
- 
   <div id="loading" class="loading-container">
     <div class="loading-spinner"></div>
     <div class="loading-text">Loading car bookings...</div>
   </div>
- 
   <div id="error-container" style="display: none;"></div>
- 
   <div id="main-content" style="display: none;">
     <div class="info-bar">
       <strong>📊 DataTables Mode:</strong> Showing all future bookings. Use the search box or filters to refine results.
     </div>
-   
     <div class="controls">
       <div class="search-box">
         <label for="search">Search:</label>
@@ -202,7 +198,6 @@
         <button onclick="filterByDate('week')" id="btn-week">This Week</button>
       </div>
     </div>
-   
     <div class="table-container">
       <table id="bookings" class="display">
         <thead>
@@ -214,6 +209,7 @@
             <th class="center">Setoff</th>
             <th class="center">Pickup</th>
             <th class="center">Arrive</th>
+            <th>Type</th>
           </tr>
         </thead>
         <tbody id="bookings-body">
@@ -221,11 +217,9 @@
       </table>
     </div>
   </div>
- 
   <footer id="footer" class="footer" style="display: none;">
     <p>Last updated: <span id="last-updated-time"></span></p>
   </footer>
- 
   <script>
     let allBookings = [];
     let dataTable = null;
@@ -294,7 +288,6 @@
         if (dataTable) {
           dataTable.destroy();
         }
-
         dataTable = $('#bookings').DataTable({
           data: allBookings,
           columns: [
@@ -306,7 +299,6 @@
             { data: 'Pickup', className: 'center' },
             { data: 'Arrive', className: 'center' },
             { data: 'Type' }
-            
           ],
           pageLength: 10,
           order: [[0, 'asc']],
@@ -368,7 +360,7 @@
     }
 
     function loadBookings() {
-      console.log('Loading bookings from bookings.txt...');
+      console.log('Loading bookings from ReportUpcomingWeekVolEmail.txt...');
       fetch('ReportUpcomingWeekVolEmail.txt')
         .then(response => {
           if (!response.ok) {
@@ -383,12 +375,10 @@
               delimiter: ",",
               skipEmptyLines: true
             });
-
             if (!results.data || results.data.length === 0) {
-              showError('No Data', 'No booking data available in bookings.txt.');
+              showError('No Data', 'No booking data available in ReportUpcomingWeekVolEmail.txt.');
               return;
             }
-
             const headers = ["Date", "Day", "From", "To", "Setoff", "Pickup", "Arrive", "Type"];
             allBookings = results.data.map(row => {
               const booking = {};
@@ -402,14 +392,12 @@
               });
               return booking;
             });
-
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             allBookings = allBookings.filter(booking => {
               const bookingDate = parseDate(booking.originalDate);
               return !bookingDate || bookingDate >= today;
             });
-
             console.log(`Loaded ${allBookings.length} future bookings`);
             if (initDataTable()) {
               hideLoading();
@@ -420,8 +408,8 @@
           }
         })
         .catch(error => {
-          console.error('Error fetching bookings.txt:', error);
-          showError('Fetch Error', `Failed to load bookings.txt: ${error.message}. Please ensure the file exists and is accessible.`);
+          console.error('Error fetching ReportUpcomingWeekVolEmail.txt:', error);
+          showError('Fetch Error', `Failed to load ReportUpcomingWeekVolEmail.txt: ${error.message}. Please ensure the file exists and is accessible.`);
         });
     }
 
