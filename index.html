@@ -4,25 +4,112 @@
   <meta charset="UTF-8">
   <title>Car Bookings</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h1 { margin-bottom: 20px; }
-    table { width: 100%; }
-    /* ✅ Improvement 3: Better readability */
-    table.dataTable tbody tr:nth-child(odd) {
-      background-color: #f9f9f9;
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 10px; 
+      max-width: 100%;
+      overflow-x: auto;
     }
-    table.dataTable tbody td {
+    h1 { margin-bottom: 20px; }
+    
+    /* ✅ Simple table styling */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+    
+    table { 
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
       vertical-align: middle;
     }
-    .dt-body-center {
+    
+    th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    tbody tr:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+    
+    tbody tr:hover {
+      background-color: #f0f8ff;
+    }
+    
+    .center {
       text-align: center;
     }
     
-    /* ✅ Improvement 4: Sophisticated loading indicator */
+    /* ✅ Controls styling */
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .search-box, .filter-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    input[type="text"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f8f9fa;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #e9ecef;
+    }
+    
+    button.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    /* ✅ Mobile responsive styles */
+    @media (max-width: 768px) {
+      body { margin: 5px; }
+      h1 { font-size: 1.5em; }
+      th, td { padding: 6px 4px; font-size: 14px; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-box, .filter-buttons { justify-content: center; }
+    }
+    
+    @media (max-width: 480px) {
+      body { margin: 2px; }
+      h1 { font-size: 1.3em; }
+      th, td { padding: 4px 2px; font-size: 12px; }
+    }
+    
+    /* ✅ Loading and error styles */
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -59,238 +146,339 @@
       margin: 20px 0;
     }
     
-    .error-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .retry-button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      cursor: pointer;
+    .footer {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-top: 1px solid #dee2e6;
+      text-align: center;
+      color: #6c757d;
       font-size: 14px;
-      margin-top: 10px;
     }
     
-    .retry-button:hover {
-      background-color: #0056b3;
+    .info-bar {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 <body>
   <h1>Car Bookings</h1>
   
-  <!-- ✅ Improvement 4: Enhanced loading indicator -->
   <div id="loading" class="loading-container">
     <div class="loading-spinner"></div>
     <div class="loading-text">Loading car bookings...</div>
   </div>
   
-  <!-- ✅ Improvement 1: Error handling UI -->
   <div id="error-container" style="display: none;"></div>
   
-  <table id="bookings" class="display" style="display: none;"></table>
+  <div id="main-content" style="display: none;">
+    <div class="info-bar">
+      <strong>📊 Simple Table Mode:</strong> Showing all future bookings. Use the search box to filter results.
+    </div>
+    
+    <div class="controls">
+      <div class="search-box">
+        <label for="search">Search:</label>
+        <input type="text" id="search" placeholder="Search bookings..." onkeyup="filterTable()">
+      </div>
+      <div class="filter-buttons">
+        <button onclick="filterByDate('all')" class="active" id="btn-all">All</button>
+        <button onclick="filterByDate('today')" id="btn-today">Today</button>
+        <button onclick="filterByDate('week')" id="btn-week">This Week</button>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table id="bookings">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Date 📅</th>
+            <th onclick="sortTable(1)">Day</th>
+            <th onclick="sortTable(2)">From</th>
+            <th onclick="sortTable(3)">To</th>
+            <th onclick="sortTable(4)" class="center">Setoff</th>
+            <th onclick="sortTable(5)" class="center">Pickup</th>
+            <th onclick="sortTable(6)" class="center">Arrive</th>
+          </tr>
+        </thead>
+        <tbody id="bookings-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
   
-  <!-- jQuery + DataTables + Responsive -->
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <footer id="footer" class="footer" style="display: none;">
+    <p>Last updated: <span id="last-updated-time"></span></p>
+  </footer>
+  
+  <!-- Only load PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
-    function showError(title, message, showRetry = true) {
+    // ✅ Test data embedded directly
+    const testData = `15/09/2025,Monday,London,Birmingham,08:00,08:30,10:15
+16/09/2025,Tuesday,Manchester,Leeds,07:30,08:00,10:30
+17/09/2025,Wednesday,London,Oxford,09:15,09:45,11:30
+18/09/2025,Thursday,Brighton,London,08:45,09:15,11:45
+19/09/2025,Friday,Cambridge,Norwich,10:00,10:30,12:15
+20/09/2025,Saturday,London,Bath,09:00,09:30,12:00
+21/09/2025,Sunday,Bristol,Cardiff,10:30,11:00,12:45
+22/09/2025,Monday,London,Reading,07:45,08:15,09:30
+23/09/2025,Tuesday,Swindon,Gloucester,08:30,09:00,10:45
+24/09/2025,Wednesday,Birmingham,Coventry,07:15,07:45,08:30
+25/09/2025,Thursday,Leicester,Nottingham,11:45,12:15,13:30
+26/09/2025,Friday,Sheffield,Leeds,08:00,08:30,09:45
+27/09/2025,Saturday,York,Hull,13:00,13:30,15:00
+28/09/2025,Sunday,Lincoln,Peterborough,09:30,10:00,11:45
+29/09/2025,Monday,London,Luton,06:45,07:15,08:00
+30/09/2025,Tuesday,Milton Keynes,Northampton,11:30,12:00,12:45`;
+
+    let allBookings = [];
+    let currentSort = { column: 0, ascending: true };
+    let currentFilter = 'all';
+
+    function parseDate(dateStr) {
+      if (!dateStr || !dateStr.trim()) return null;
+      const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (ddmmyyyy) {
+        const day = parseInt(ddmmyyyy[1], 10);
+        const month = parseInt(ddmmyyyy[2], 10) - 1;
+        const year = parseInt(ddmmyyyy[3], 10);
+        return new Date(year, month, day);
+      }
+      return null;
+    }
+
+    function formatDateForDisplay(dateStr) {
+      const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (ddmmyyyy) {
+        return `${ddmmyyyy[1]}/${ddmmyyyy[2]}`;
+      }
+      return dateStr;
+    }
+
+    function updateLastUpdatedTime() {
+      const timeElement = document.getElementById("last-updated-time");
+      if (timeElement) {
+        const now = new Date();
+        const timeString = now.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        timeElement.textContent = timeString;
+      }
+    }
+
+    function showError(title, message) {
       const errorContainer = document.getElementById("error-container");
-      errorContainer.innerHTML = `
-        <div class="error-message">
-          <div class="error-title">${title}</div>
-          <div>${message}</div>
-          ${showRetry ? '<button class="retry-button" onclick="loadBookings()">Try Again</button>' : ''}
-        </div>
-      `;
-      errorContainer.style.display = 'block';
-      document.getElementById("loading").style.display = 'none';
+      if (errorContainer) {
+        errorContainer.innerHTML = `<div class="error-message"><strong>${title}:</strong> ${message}</div>`;
+        errorContainer.style.display = 'block';
+      }
+      hideLoading();
     }
-    
-    function hideError() {
-      document.getElementById("error-container").style.display = 'none';
-    }
-    
-    function showLoading() {
-      document.getElementById("loading").style.display = 'flex';
-      document.getElementById("bookings").style.display = 'none';
-      document.getElementById("footer").style.display = 'none';
-      hideError();
-    }
-    
+
     function hideLoading() {
-      document.getElementById("loading").style.display = 'none';
-      document.getElementById("bookings").style.display = 'table';
-    }
-    
-    function loadBookings() {
-      showLoading();
-      
-      Papa.parse('ReportUpcomingWeekVolEmail.txt', {
-        download: true,
-        header: false,
-        delimiter: ",",
-        skipEmptyLines: true,
-        complete: function(results) {
-          try {
-            // ✅ Improvement 1: Check for parsing errors
-            if (results.errors && results.errors.length > 0) {
-              const errorMessages = results.errors.map(error => error.message).join(', ');
-              showError(
-                'Data Parsing Error',
-                `There were issues parsing the booking data: ${errorMessages}`
-              );
-              return;
-            }
-            
-            let data = results.data;
-            
-            if (!data || data.length === 0) {
-              hideLoading();
-              document.querySelector("body").insertAdjacentHTML(
-                "beforeend",
-                "<p><em>No bookings found in the file.</em></p>"
-              );
-              return;
-            }
-            
-            const headers = [
-              "Date",
-              "Day",
-              "From",
-              "To",
-              "Setoff",
-              "Pickup",
-              "Arrive",
-              "Type"
-            ];
-            
-            // ✅ Improvement 1: Validate data structure
-            const maxColumns = Math.max(...data.map(row => row.length));
-            if (maxColumns > headers.length) {
-              console.warn(`Data has ${maxColumns} columns but only ${headers.length} headers defined`);
-            }
-            
-            data = data.map((row, index) => {
-              let obj = {};
-              headers.forEach((h, i) => {
-                obj[h] = row[i] ?? "";
-              });
-              
-              // ✅ Improvement 1: Validate date format
-              if (obj["Date"] && obj["Date"].trim()) {
-                const dateTest = new Date(obj["Date"]);
-                if (isNaN(dateTest.getTime())) {
-                  console.warn(`Invalid date format in row ${index + 1}: "${obj["Date"]}"`);
-                }
-              }
-              
-              return obj;
-            });
-            
-            const columns = headers.map(h => ({
-              title: h,
-              data: h,
-              type: h === "Date" ? "date" : undefined,
-              className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
-            }));
-            
-            // ✅ Custom filter: hide rows where Date < today
-            $.fn.dataTable.ext.search.push(function(settings, rowData) {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0); // midnight
-              const bookingDate = new Date(rowData["Date"]);
-              if (isNaN(bookingDate)) return true; // keep rows with invalid dates
-              return bookingDate >= today;
-            });
-            
-            // ✅ Register custom date sorting for dd/mm format (but sort by full date)
-            $.fn.dataTable.ext.type.order['date-uk-pre'] = function (d) {
-              // We need to reconstruct the full date for proper sorting
-              // Assume current year for dd/mm format
-              const currentYear = new Date().getFullYear();
-              const ddmm = d.match(/^(\d{1,2})\/(\d{1,2})$/);
-              if (ddmm) {
-                const day = parseInt(ddmm[1], 10);
-                const month = parseInt(ddmm[2], 10) - 1;
-                const fullDate = new Date(currentYear, month, day);
-                return fullDate.getTime();
-              }
-              return 0;
-            };
-            
-            // ✅ Improvement 1: Wrap DataTable initialization in try-catch
-            const table = $('#bookings').DataTable({
-              data: data,
-              columns: columns,
-              pageLength: 25,
-              scrollX: true, // ✅ Fix: Enable horizontal scrolling
-              responsive: {
-                details: {
-                  type: 'column',
-                  target: 'tr'
-                }
-              },
-              columnDefs: [
-                // ✅ Fix: Make columns responsive with priorities
-                { responsivePriority: 1, targets: [0, 1] }, // Date and Day always visible
-                { responsivePriority: 2, targets: [2, 3] }, // From and To second priority
-                { responsivePriority: 3, targets: [4, 5, 6] } // Times can be hidden on small screens
-              ],
-              language: {
-                emptyTable: "No bookings match your filters",
-                loadingRecords: "Loading bookings…",
-                zeroRecords: "No matching bookings found"
-              },
-              order: [
-                [headers.indexOf("Date"), 'asc'],
-                [headers.indexOf("Arrive"), 'asc'],
-                [headers.indexOf("Pickup"), 'asc'],
-                [headers.indexOf("Setoff"), 'asc']
-              ]
-            });
-            
-            table.draw();
-            hideLoading();
-            
-          } catch (error) {
-            console.error('Error processing booking data:', error);
-            showError(
-              'Processing Error',
-              `An error occurred while processing the booking data: ${error.message}`
-            );
-          }
-        },
-        
-        // ✅ Improvement 1: Handle Papa Parse errors
-        error: function(error) {
-          console.error('Papa Parse error:', error);
-          showError(
-            'File Loading Error',
-            'Could not load the booking data file. Please check that "ReportUpcomingWeekVolEmail.txt" exists and is accessible.'
-          );
+      const elements = ['loading', 'main-content', 'footer'];
+      elements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.display = id === 'loading' ? 'none' : 
+                            id === 'main-content' ? 'block' : 'block';
         }
       });
+      updateLastUpdatedTime();
     }
-    
-    // ✅ Improvement 1: Handle network/file loading errors with timeout
-    setTimeout(() => {
-      const loadingElement = document.getElementById("loading");
-      if (loadingElement && loadingElement.style.display !== 'none') {
-        showError(
-          'Loading Timeout',
-          'The booking data is taking longer than expected to load. This might be due to a network issue or the file being unavailable.'
+
+    function renderTable() {
+      const tbody = document.getElementById('bookings-body');
+      if (!tbody) return;
+
+      let filteredBookings = [...allBookings];
+      
+      // Apply date filter
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (currentFilter === 'today') {
+        filteredBookings = filteredBookings.filter(booking => {
+          const bookingDate = parseDate(booking.originalDate);
+          return bookingDate && bookingDate.toDateString() === today.toDateString();
+        });
+      } else if (currentFilter === 'week') {
+        const weekFromNow = new Date(today);
+        weekFromNow.setDate(today.getDate() + 7);
+        filteredBookings = filteredBookings.filter(booking => {
+          const bookingDate = parseDate(booking.originalDate);
+          return bookingDate && bookingDate >= today && bookingDate <= weekFromNow;
+        });
+      }
+
+      // Apply search filter
+      const searchTerm = document.getElementById('search')?.value.toLowerCase() || '';
+      if (searchTerm) {
+        filteredBookings = filteredBookings.filter(booking => 
+          Object.values(booking).some(value => 
+            value.toString().toLowerCase().includes(searchTerm)
+          )
         );
       }
-    }, 10000); // 10 second timeout
-    
-    // Start loading when page loads (ensure DOM is ready)
+
+      // Sort bookings
+      filteredBookings.sort((a, b) => {
+        const keys = ['Date', 'Day', 'From', 'To', 'Setoff', 'Pickup', 'Arrive'];
+        const key = keys[currentSort.column];
+        
+        let aVal = a[key] || '';
+        let bVal = b[key] || '';
+        
+        // Special handling for date sorting
+        if (key === 'Date') {
+          const aDate = parseDate(a.originalDate);
+          const bDate = parseDate(b.originalDate);
+          if (aDate && bDate) {
+            return currentSort.ascending ? aDate - bDate : bDate - aDate;
+          }
+        }
+        
+        // String comparison
+        if (aVal < bVal) return currentSort.ascending ? -1 : 1;
+        if (aVal > bVal) return currentSort.ascending ? 1 : -1;
+        return 0;
+      });
+
+      // Render rows
+      tbody.innerHTML = filteredBookings.map(booking => `
+        <tr>
+          <td>${booking.Date}</td>
+          <td>${booking.Day}</td>
+          <td>${booking.From}</td>
+          <td>${booking.To}</td>
+          <td class="center">${booking.Setoff}</td>
+          <td class="center">${booking.Pickup}</td>
+          <td class="center">${booking.Arrive}</td>
+        </tr>
+      `).join('');
+
+      // Update info
+      const infoBar = document.querySelector('.info-bar');
+      if (infoBar) {
+        const total = allBookings.length;
+        const showing = filteredBookings.length;
+        infoBar.innerHTML = `<strong>📊 Simple Table Mode:</strong> Showing ${showing} of ${total} future bookings.`;
+      }
+    }
+
+    function sortTable(columnIndex) {
+      if (currentSort.column === columnIndex) {
+        currentSort.ascending = !currentSort.ascending;
+      } else {
+        currentSort.column = columnIndex;
+        currentSort.ascending = true;
+      }
+      renderTable();
+    }
+
+    function filterByDate(filter) {
+      currentFilter = filter;
+      
+      // Update button states
+      document.querySelectorAll('.filter-buttons button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`btn-${filter}`).classList.add('active');
+      
+      renderTable();
+    }
+
+    function filterTable() {
+      renderTable();
+    }
+
+    function loadBookings() {
+      console.log('Loading bookings with DataTables...');
+      
+      // Wait for libraries to load
+      let attempts = 0;
+      const maxAttempts = 50;
+      
+      function checkLibraries() {
+        attempts++;
+        
+        if (typeof $ !== 'undefined' && typeof $.fn.DataTable !== 'undefined' && typeof Papa !== 'undefined') {
+          console.log('✅ All libraries loaded successfully');
+          processData();
+        } else if (attempts < maxAttempts) {
+          console.log(`Waiting for libraries... attempt ${attempts}`);
+          setTimeout(checkLibraries, 100);
+        } else {
+          console.error('❌ Library loading timeout');
+          showError('Library Error', 'DataTables or other required libraries failed to load. Please refresh the page.');
+        }
+      }
+      
+      function processData() {
+        try {
+          const results = Papa.parse(testData, {
+            header: false,
+            delimiter: ",",
+            skipEmptyLines: true
+          });
+
+          if (!results.data || results.data.length === 0) {
+            showError('No Data', 'No booking data available.');
+            return;
+          }
+
+          const headers = ["Date", "Day", "From", "To", "Setoff", "Pickup", "Arrive"];
+          
+          allBookings = results.data.map(row => {
+            const booking = {};
+            headers.forEach((header, i) => {
+              if (header === "Date") {
+                booking.originalDate = row[i] || "";
+                booking[header] = formatDateForDisplay(row[i] || "");
+              } else {
+                booking[header] = row[i] || "";
+              }
+            });
+            return booking;
+          });
+
+          // Filter out past bookings
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          allBookings = allBookings.filter(booking => {
+            const bookingDate = parseDate(booking.originalDate);
+            return !bookingDate || bookingDate >= today;
+          });
+
+          console.log(`Loaded ${allBookings.length} future bookings`);
+          
+          if (initDataTable()) {
+            hideLoading();
+            updateInfoBar();
+          }
+
+        } catch (error) {
+          console.error('Error loading bookings:', error);
+          showError('Loading Error', `Failed to load booking data: ${error.message}`);
+        }
+      }
+      
+      checkLibraries();
+    }
+
+    // Start when page loads
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', loadBookings);
     } else {
