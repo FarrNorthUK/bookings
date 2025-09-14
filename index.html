@@ -215,6 +215,40 @@
             updateLastUpdatedTime();
         }
 
+        // Custom sorting for time strings (e.g., "14:00")
+        $.extend($.fn.dataTableExt.oSort, {
+            "time-hhmm-pre": function (a) {
+                if (a === null || a === '') {
+                    return 0;
+                }
+                const parts = a.split(':');
+                return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+            },
+            "time-hhmm-asc": function (a, b) {
+                return a - b;
+            },
+            "time-hhmm-desc": function (a, b) {
+                return b - a;
+            }
+        });
+
+        // Custom sorting for dates in 'dd/mm' format
+        $.extend($.fn.dataTableExt.oSort, {
+            "dd-mm-pre": function (a) {
+                if (a === null || a === '') {
+                    return 0;
+                }
+                const parts = a.split('/');
+                return parseInt(parts[1], 10) * 100 + parseInt(parts[0], 10);
+            },
+            "dd-mm-asc": function (a, b) {
+                return a - b;
+            },
+            "dd-mm-desc": function (a, b) {
+                return b - a;
+            }
+        });
+
         function initDataTable() {
             try {
                 if (!window.jQuery || !$.fn.DataTable) {
@@ -226,13 +260,13 @@
                 dataTable = $('#bookings').DataTable({
                     data: allBookings,
                     columns: [
-                        { data: 'Date' },
+                        { data: 'Date', type: 'dd-mm' },
                         { data: 'Day' },
                         { data: 'From' },
                         { data: 'To' },
-                        { data: 'Setoff', className: 'center' },
-                        { data: 'Pickup', className: 'center' },
-                        { data: 'Arrive', className: 'center' },
+                        { data: 'Setoff', className: 'center', type: 'time-hhmm' },
+                        { data: 'Pickup', className: 'center', type: 'time-hhmm' },
+                        { data: 'Arrive', className: 'center', type: 'time-hhmm' },
                         { data: 'Type' }
                     ],
                     pageLength: 10,
