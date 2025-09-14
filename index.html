@@ -1,416 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Car Bookings</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- jQuery CDN with integrity check -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-  <!-- Fallback for jQuery if CDN fails -->
-  <script>window.jQuery || document.write('<script src="js/jquery-3.7.1.min.js"><\/script>');</script>
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/jquery.dataTables.min.css">
-  <!-- DataTables JS with integrity check -->
-  <script src="https://cdn.datatables.net/2.1.8/js/jquery.dataTables.min.js" integrity="sha256-1f4MDD2bF9X7NHF/n0V+0lHPBtzN7+3lK+NDY8E8A8M=" crossorigin="anonymous"></script>
-  <!-- Fallback for DataTables if CDN fails -->
-  <script>window.jQuery.fn.DataTable || document.write('<script src="js/jquery.dataTables.min.js"><\/script>');</script>
-  <!-- PapaParse for CSV parsing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 10px;
-      max-width: 100%;
-      overflow-x: auto;
-    }
-    h1 { margin-bottom: 20px; }
- 
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      margin-bottom: 20px;
-    }
- 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 0;
-    }
- 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-      vertical-align: middle;
-    }
- 
-    th {
-      background-color: #f5f5f5;
-      font-weight: bold;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
- 
-    tbody tr:nth-child(odd) {
-      background-color: #f9f9f9;
-    }
- 
-    tbody tr:hover {
-      background-color: #f0f8ff;
-    }
- 
-    .center {
-      text-align: center;
-    }
- 
-    .controls {
-      margin-bottom: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-items: center;
-    }
- 
-    .search-box, .filter-buttons {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
- 
-    input[type="text"] {
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
- 
-    button {
-      padding: 8px 16px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: #f8f9fa;
-      cursor: pointer;
-      font-size: 14px;
-    }
- 
-    button:hover {
-      background: #e9ecef;
-    }
- 
-    button.active {
-      background: #007bff;
-      color: white;
-      border-color: #007bff;
-    }
- 
-    @media (max-width: 768px) {
-      body { margin: 5px; }
-      h1 { font-size: 1.5em; }
-      th, td { padding: 6px 4px; font-size: 14px; }
-      .controls { flex-direction: column; align-items: stretch; }
-      .search-box, .filter-buttons { justify-content: center; }
-    }
- 
-    @media (max-width: 480px) {
-      body { margin: 2px; }
-      h1 { font-size: 1.3em; }
-      th, td { padding: 4px 2px; font-size: 12px; }
-    }
- 
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 40px 0;
-    }
- 
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 15px;
-    }
- 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
- 
-    .loading-text {
-      color: #666;
-      font-size: 16px;
-    }
- 
-    .error-message {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-      border-radius: 4px;
-      padding: 15px;
-      margin: 20px 0;
-    }
- 
-    .footer {
-      margin-top: 30px;
-      padding: 15px;
-      background-color: #f8f9fa;
-      border-top: 1px solid #dee2e6;
-      text-align: center;
-      color: #6c757d;
-      font-size: 14px;
-    }
- 
-    .info-bar {
-      background: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      padding: 10px;
-      border-radius: 4px;
-      margin-bottom: 15px;
-    }
- 
-    .dataTables_wrapper .dataTables_filter {
-      margin-bottom: 15px;
-    }
-    .dataTables_wrapper .dataTables_length {
-      margin-bottom: 15px;
-    }
-    .dataTables_wrapper .dataTables_paginate {
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Car Bookings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="js/jquery-3.7.1.min.js"><\/script>');</script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.1.8/js/jquery.dataTables.min.js" integrity="sha256-1f4MDD2bF9X7NHF/n0V+0lHPBtzN7+3lK+NDY8E8A8M=" crossorigin="anonymous"></script>
+    <script>window.jQuery.fn.DataTable || document.write('<script src="js/jquery.dataTables.min.js"><\/script>');</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        h1 { margin-bottom: 20px; }
+    
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+    
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+    
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+    
+        tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+    
+        tbody tr:hover {
+            background-color: #f0f8ff;
+        }
+    
+        .center {
+            text-align: center;
+        }
+    
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+    
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+    
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    
+        .loading-text {
+            color: #666;
+            font-size: 16px;
+        }
+    
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    
+        .footer {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    
+        .info-bar {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+    
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 15px;
+        }
+        .dataTables_wrapper .dataTables_length {
+            margin-bottom: 15px;
+        }
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Car Bookings</h1>
-  <div id="loading" class="loading-container">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Loading car bookings...</div>
-  </div>
-  <div id="error-container" style="display: none;"></div>
-  <div id="main-content" style="display: none;">
-    <div class="table-container">
-      <table id="bookings" class="display">
-        <thead>
-          <tr>
-            <th>Date 📅</th>
-            <th>Day</th>
-            <th>From</th>
-            <th>To</th>
-            <th class="center">Setoff</th>
-            <th class="center">Pickup</th>
-            <th class="center">Arrive</th>
-            <th>Type</th>
-          </tr>
-        </thead>
-        <tbody id="bookings-body">
-        </tbody>
-      </table>
+    <h1>Car Bookings</h1>
+    <div id="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading car bookings...</div>
     </div>
-  </div>
-  <footer id="footer" class="footer" style="display: none;">
-    <p>Last updated: <span id="last-updated-time"></span></p>
-  </footer>
-  <script>
-    let allBookings = [];
-    let dataTable = null;
-    let currentFilter = 'all';
+    <div id="error-container" style="display: none;"></div>
+    <div id="main-content" style="display: none;">
+        <div class="table-container">
+            <table id="bookings" class="display">
+                <thead>
+                    <tr>
+                        <th>Date 📅</th>
+                        <th>Day</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th class="center">Setoff</th>
+                        <th class="center">Pickup</th>
+                        <th class="center">Arrive</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody id="bookings-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <footer id="footer" class="footer" style="display: none;">
+        <p>Last updated: <span id="last-updated-time"></span></p>
+    </footer>
+    <script>
+        let allBookings = [];
+        let dataTable = null;
 
-    function parseDate(dateStr) {
-      if (!dateStr || !dateStr.trim()) return null;
-      const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      if (ddmmyyyy) {
-        const day = parseInt(ddmmyyyy[1], 10);
-        const month = parseInt(ddmmyyyy[2], 10) - 1;
-        const year = parseInt(ddmmyyyy[3], 10);
-        return new Date(year, month, day);
-      }
-      return null;
-    }
-
-    function formatDateForDisplay(dateStr) {
-      const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      if (ddmmyyyy) {
-        return `${ddmmyyyy[1]}/${ddmmyyyy[2]}`;
-      }
-      return dateStr;
-    }
-
-    function updateLastUpdatedTime() {
-      const timeElement = document.getElementById("last-updated-time");
-      if (timeElement) {
-        const now = new Date();
-        const timeString = now.toLocaleString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        });
-        timeElement.textContent = timeString;
-      }
-    }
-
-    function showError(title, message) {
-      const errorContainer = document.getElementById("error-container");
-      if (errorContainer) {
-        errorContainer.innerHTML = `<div class="error-message"><strong>${title}:</strong> ${message}</div>`;
-        errorContainer.style.display = 'block';
-      }
-      hideLoading();
-    }
-
-    function hideLoading() {
-      const elements = ['loading', 'main-content', 'footer'];
-      elements.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.style.display = id === 'loading' ? 'none' :
-                            id === 'main-content' ? 'block' : 'block';
-        }
-      });
-      updateLastUpdatedTime();
-    }
-
-    function initDataTable() {
-      try {
-        if (!window.jQuery || !$.fn.DataTable) {
-          throw new Error('DataTables or jQuery is not loaded');
-        }
-        if (dataTable) {
-          dataTable.destroy();
-        }
-        dataTable = $('#bookings').DataTable({
-          data: allBookings,
-          columns: [
-            { data: 'Date' },
-            { data: 'Day' },
-            { data: 'From' },
-            { data: 'To' },
-            { data: 'Setoff', className: 'center' },
-            { data: 'Pickup', className: 'center' },
-            { data: 'Arrive', className: 'center' },
-            { data: 'Type' }
-          ],
-          pageLength: 10,
-          order: [[0, 'asc']],
-          searching: true,
-          paging: true,
-          info: true,
-          language: {
-            info: 'Showing _START_ to _END_ of _TOTAL_ bookings',
-            infoFiltered: '(filtered from _MAX_ total bookings)'
-          }
-        });
-        $.fn.dataTable.ext.search.push((settings, data, dataIndex) => {
-          const bookingDate = parseDate(allBookings[dataIndex].originalDate);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          if (currentFilter === 'today') {
-            return bookingDate && bookingDate.toDateString() === today.toDateString();
-          } else if (currentFilter === 'week') {
-            const weekFromNow = new Date(today);
-            weekFromNow.setDate(today.getDate() + 7);
-            return bookingDate && bookingDate >= today && bookingDate <= weekFromNow;
-          }
-          return true;
-        });
-        $('#search').on('keyup', function() {
-          dataTable.search(this.value).draw();
-        });
-        updateInfoBar();
-        return true;
-      } catch (error) {
-        console.error('Error initializing DataTable:', error);
-        showError('DataTable Error', `Failed to initialize table: ${error.message}. Please check your network or CDN.`);
-        return false;
-      }
-    }
-
-    function filterByDate(filter) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-buttons button').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.getElementById(`btn-${filter}`).classList.add('active');
-      if (dataTable) {
-        dataTable.draw();
-      }
-    }
-
-    function loadBookings() {
-      console.log('Loading bookings from ReportUpcomingWeekVolEmail.txt...');
-      fetch('ReportUpcomingWeekVolEmail.txt')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.text();
-        })
-        .then(data => {
-          try {
-            const results = Papa.parse(data, {
-              header: false,
-              delimiter: ",",
-              skipEmptyLines: true
-            });
-            if (!results.data || results.data.length === 0) {
-              showError('No Data', 'No booking data available in ReportUpcomingWeekVolEmail.txt.');
-              return;
+        function parseDate(dateStr) {
+            if (!dateStr || !dateStr.trim()) return null;
+            const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (ddmmyyyy) {
+                const day = parseInt(ddmmyyyy[1], 10);
+                const month = parseInt(ddmmyyyy[2], 10) - 1;
+                const year = parseInt(ddmmyyyy[3], 10);
+                return new Date(year, month, day);
             }
-            const headers = ["Date", "Day", "From", "To", "Setoff", "Pickup", "Arrive", "Type"];
-            allBookings = results.data.map(row => {
-              const booking = {};
-              headers.forEach((header, i) => {
-                if (header === "Date") {
-                  booking.originalDate = row[i] || "";
-                  booking[header] = formatDateForDisplay(row[i] || "");
-                } else {
-                  booking[header] = row[i] || "";
+            return null;
+        }
+
+        function formatDateForDisplay(dateStr) {
+            const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (ddmmyyyy) {
+                return `${ddmmyyyy[1]}/${ddmmyyyy[2]}`;
+            }
+            return dateStr;
+        }
+
+        function updateLastUpdatedTime() {
+            const timeElement = document.getElementById("last-updated-time");
+            if (timeElement) {
+                const now = new Date();
+                const timeString = now.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                timeElement.textContent = timeString;
+            }
+        }
+
+        function showError(title, message) {
+            const errorContainer = document.getElementById("error-container");
+            if (errorContainer) {
+                errorContainer.innerHTML = `<div class="error-message"><strong>${title}:</strong> ${message}</div>`;
+                errorContainer.style.display = 'block';
+            }
+            hideLoading();
+        }
+
+        function hideLoading() {
+            const elements = ['loading', 'main-content', 'footer'];
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.display = id === 'loading' ? 'none' : 'block';
                 }
-              });
-              return booking;
             });
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            allBookings = allBookings.filter(booking => {
-              const bookingDate = parseDate(booking.originalDate);
-              return !bookingDate || bookingDate >= today;
-            });
-            console.log(`Loaded ${allBookings.length} future bookings`);
-            if (initDataTable()) {
-              hideLoading();
-            }
-          } catch (error) {
-            console.error('Error parsing bookings:', error);
-            showError('Parsing Error', `Failed to parse booking data: ${error.message}`);
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching ReportUpcomingWeekVolEmail.txt:', error);
-          showError('Fetch Error', `Failed to load ReportUpcomingWeekVolEmail.txt: ${error.message}. Please ensure the file exists and is accessible.`);
-        });
-    }
+            updateLastUpdatedTime();
+        }
 
-    // Wait for document and libraries to load
-    $(document).ready(function() {
-      if (!window.jQuery) {
-        console.error('jQuery not loaded');
-        showError('jQuery Error', 'jQuery library failed to load. Please check your network or CDN.');
-        return;
-      }
-      if (!$.fn.DataTable) {
-        console.error('DataTables not loaded');
-        showError('DataTable Error', 'DataTables library failed to load. Please check your network or CDN.');
-        return;
-      }
-      loadBookings();
-    });
-  </script>
+        function initDataTable() {
+            try {
+                if (!window.jQuery || !$.fn.DataTable) {
+                    throw new Error('DataTables or jQuery is not loaded');
+                }
+                if (dataTable) {
+                    dataTable.destroy();
+                }
+                dataTable = $('#bookings').DataTable({
+                    data: allBookings,
+                    columns: [
+                        { data: 'Date' },
+                        { data: 'Day' },
+                        { data: 'From' },
+                        { data: 'To' },
+                        { data: 'Setoff', className: 'center' },
+                        { data: 'Pickup', className: 'center' },
+                        { data: 'Arrive', className: 'center' },
+                        { data: 'Type' }
+                    ],
+                    pageLength: 10,
+                    order: [[0, 'asc']],
+                    searching: true,
+                    paging: true,
+                    info: true
+                });
+                return true;
+            } catch (error) {
+                console.error('Error initializing DataTable:', error);
+                showError('DataTable Error', `Failed to initialize table: ${error.message}. Please check your network or CDN.`);
+                return false;
+            }
+        }
+
+        function loadBookings() {
+            console.log('Loading bookings from ReportUpcomingWeekVolEmail.txt...');
+            fetch('ReportUpcomingWeekVolEmail.txt')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    try {
+                        const results = Papa.parse(data, {
+                            header: false,
+                            delimiter: ",",
+                            skipEmptyLines: true
+                        });
+                        if (!results.data || results.data.length === 0) {
+                            showError('No Data', 'No booking data available in ReportUpcomingWeekVolEmail.txt.');
+                            return;
+                        }
+                        const headers = ["Date", "Day", "From", "To", "Setoff", "Pickup", "Arrive", "Type"];
+                        allBookings = results.data.map(row => {
+                            const booking = {};
+                            headers.forEach((header, i) => {
+                                if (header === "Date") {
+                                    booking.originalDate = row[i] || "";
+                                    booking[header] = formatDateForDisplay(row[i] || "");
+                                } else {
+                                    booking[header] = row[i] || "";
+                                }
+                            });
+                            return booking;
+                        });
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        allBookings = allBookings.filter(booking => {
+                            const bookingDate = parseDate(booking.originalDate);
+                            return !bookingDate || bookingDate >= today;
+                        });
+                        console.log(`Loaded ${allBookings.length} future bookings`);
+                        if (initDataTable()) {
+                            hideLoading();
+                        }
+                    } catch (error) {
+                        console.error('Error parsing bookings:', error);
+                        showError('Parsing Error', `Failed to parse booking data: ${error.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching ReportUpcomingWeekVolEmail.txt:', error);
+                    showError('Fetch Error', `Failed to load ReportUpcomingWeekVolEmail.txt: ${error.message}. Please ensure the file exists and is accessible.`);
+                });
+        }
+
+        // Wait for document and libraries to load
+        $(document).ready(function() {
+            if (!window.jQuery) {
+                console.error('jQuery not loaded');
+                showError('jQuery Error', 'jQuery library failed to load. Please check your network or CDN.');
+                return;
+            }
+            if (!$.fn.DataTable) {
+                console.error('DataTables not loaded');
+                showError('DataTable Error', 'DataTables library failed to load. Please check your network or CDN.');
+                return;
+            }
+            loadBookings();
+        });
+    </script>
 </body>
 </html>
