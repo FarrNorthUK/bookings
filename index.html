@@ -192,20 +192,6 @@
   </div>
   <div id="error-container" style="display: none;"></div>
   <div id="main-content" style="display: none;">
-    <div class="info-bar">
-      <strong>📊 DataTables Mode:</strong> Showing all future bookings. Use the search box or filters to refine results.
-    </div>
-    <div class="controls">
-      <div class="search-box">
-        <label for="search">Search:</label>
-        <input type="text" id="search" placeholder="Search bookings...">
-      </div>
-      <div class="filter-buttons">
-        <button onclick="filterByDate('all')" class="active" id="btn-all">All</button>
-        <button onclick="filterByDate('today')" id="btn-today">Today</button>
-        <button onclick="filterByDate('week')" id="btn-week">This Week</button>
-      </div>
-    </div>
     <div class="table-container">
       <table id="bookings" class="display">
         <thead>
@@ -354,16 +340,6 @@
       document.getElementById(`btn-${filter}`).classList.add('active');
       if (dataTable) {
         dataTable.draw();
-        updateInfoBar();
-      }
-    }
-
-    function updateInfoBar() {
-      const infoBar = document.querySelector('.info-bar');
-      if (infoBar && dataTable) {
-        const total = allBookings.length;
-        const showing = dataTable.rows({ filter: 'applied' }).count();
-        infoBar.innerHTML = `<strong>📊 DataTables Mode:</strong> Showing ${showing} of ${total} future bookings.`;
       }
     }
 
