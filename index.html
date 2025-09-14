@@ -228,12 +228,19 @@
               data: data,
               columns: columns,
               pageLength: 25,
+              scrollX: true, // ✅ Fix: Enable horizontal scrolling
               responsive: {
                 details: {
                   type: 'column',
                   target: 'tr'
                 }
               },
+              columnDefs: [
+                // ✅ Fix: Make columns responsive with priorities
+                { responsivePriority: 1, targets: [0, 1] }, // Date and Day always visible
+                { responsivePriority: 2, targets: [2, 3] }, // From and To second priority
+                { responsivePriority: 3, targets: [4, 5, 6] } // Times can be hidden on small screens
+              ],
               language: {
                 emptyTable: "No bookings match your filters",
                 loadingRecords: "Loading bookings…",
