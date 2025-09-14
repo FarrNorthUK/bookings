@@ -1,1 +1,122 @@
-<!DOCTYPE html>  <html lang="en"><head>  <meta charset="UTF-8">  <title>Car Bookings</title>  <meta name="viewport" content="width=device-width, initial-scale=1">  <!-- DataTables CSS -->  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">  <style>    body { font-family: Arial, sans-serif; margin: 20px; }    h1 { margin-bottom: 20px; }    table { width: 100%; }    /* ✅ Improvement 3: Better readability */    table.dataTable tbody tr:nth-child(odd) {      background-color: #f9f9f9;    }    table.dataTable tbody td {      vertical-align: middle;    }    .dt-body-center {      text-align: center;    }  </style></head><body>  <h1>Car Bookings</h1>  <p id="loading">Loading bookings…</p>  <table id="bookings" class="display"></table>  <!-- jQuery + DataTables + Responsive -->  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>  <script>    Papa.parse('ReportUpcomingWeekVolEmail.txt', {      download: true,      header: false,      delimiter: ",",      skipEmptyLines: true,      complete: function(results) {        document.getElementById("loading").remove();        let data = results.data;        if (data.length === 0) {          document.querySelector("body").insertAdjacentHTML(            "beforeend",            "<p><em>No bookings found.</em></p>"          );          return;        }        const headers = [          "Date",          "Day",          "From",          "To",          "Setoff",          "Pickup",          "Arrive"        ];        data = data.map(row => {          let obj = {};          headers.forEach((h, i) => {            obj[h] = row[i] ?? "";          });          return obj;        });        const columns = headers.map(h => ({          title: h,          data: h,          type: h === "Date" ? "date" : undefined,          className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""        }));        // ✅ Custom filter: hide rows where Date < today        $.fn.dataTable.ext.search.push(function(settings, rowData) {          const today = new Date();          today.setHours(0, 0, 0, 0); // midnight          const bookingDate = new Date(rowData["Date"]);          if (isNaN(bookingDate)) return true; // keep rows with invalid dates          return bookingDate >= today;        });        const table = $('#bookings').DataTable({          data: data,          columns: columns,          pageLength: 25,          responsive: {            details: {              type: 'column',              target: 'tr'            }          },          language: {            emptyTable: "No bookings match your filters",            loadingRecords: "Loading bookings…",            zeroRecords: "No matching bookings found"          },          order: [            [headers.indexOf("Date"), 'asc'],            [headers.indexOf("Arrive"), 'asc'],            [headers.indexOf("Pickup"), 'asc'],            [headers.indexOf("Setoff"), 'asc']          ]        });        table.draw();      }    });  </script></body></html>
+<!DOCTYPE html>  
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Car Bookings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { margin-bottom: 20px; }
+    table { width: 100%; }
+
+    /* ✅ Improvement 3: Better readability */
+    table.dataTable tbody tr:nth-child(odd) {
+      background-color: #f9f9f9;
+    }
+    table.dataTable tbody td {
+      vertical-align: middle;
+    }
+    .dt-body-center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Car Bookings</h1>
+  <p id="loading">Loading bookings…</p>
+  <table id="bookings" class="display"></table>
+
+  <!-- jQuery + DataTables + Responsive -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <script>
+    Papa.parse('ReportUpcomingWeekVolEmail.txt', {
+      download: true,
+      header: false,
+      delimiter: ",",
+      skipEmptyLines: true,
+      complete: function(results) {
+        document.getElementById("loading").remove();
+
+        let data = results.data;
+
+        if (data.length === 0) {
+          document.querySelector("body").insertAdjacentHTML(
+            "beforeend",
+            "<p><em>No bookings found.</em></p>"
+          );
+          return;
+        }
+
+        const headers = [
+          "Date",
+          "Day",
+          "From",
+          "To",
+          "Setoff",
+          "Pickup",
+          "Arrive"
+        ];
+
+        data = data.map(row => {
+          let obj = {};
+          headers.forEach((h, i) => {
+            obj[h] = row[i] ?? "";
+          });
+          return obj;
+        });
+
+        const columns = headers.map(h => ({
+          title: h,
+          data: h,
+          type: h === "Date" ? "date" : undefined,
+          className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
+        }));
+
+        // ✅ Custom filter: hide rows where Date < today
+        $.fn.dataTable.ext.search.push(function(settings, rowData) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // midnight
+
+          const bookingDate = new Date(rowData["Date"]);
+          if (isNaN(bookingDate)) return true; // keep rows with invalid dates
+          return bookingDate >= today;
+        });
+
+        const table = $('#bookings').DataTable({
+          data: data,
+          columns: columns,
+          pageLength: 25,
+          responsive: {
+            details: {
+              type: 'column',
+              target: 'tr'
+            }
+          },
+          language: {
+            emptyTable: "No bookings match your filters",
+            loadingRecords: "Loading bookings…",
+            zeroRecords: "No matching bookings found"
+          },
+          order: [
+            [headers.indexOf("Date"), 'asc'],
+            [headers.indexOf("Arrive"), 'asc'],
+            [headers.indexOf("Pickup"), 'asc'],
+            [headers.indexOf("Setoff"), 'asc']
+          ]
+        });
+
+        table.draw();
+      }
+    });
+  </script>
+</body>
+</html>
