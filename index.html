@@ -70,7 +70,8 @@
           "To",
           "Setoff",
           "Pickup",
-          "Arrive"
+          "Arrive",
+          "Type"
         ];
 
         // Parse and format data
@@ -80,9 +81,7 @@
             if (h === "Date") {
               const fullDate = dayjs(row[i], "DD/MM/YYYY");
               if (fullDate.isValid()) {
-                // Display dd/mm, but store full date in tooltip
                 obj[h] = `<span title="${fullDate.format("DD/MM/YYYY")}">${fullDate.format("DD/MM")}</span>`;
-                // Store fullDate for filtering
                 obj._fullDate = fullDate;
               } else {
                 obj[h] = row[i];
@@ -109,8 +108,7 @@
           data: h,
           className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : "",
           render: function(data, type, row, meta) {
-            // Prevent HTML from being escaped in Date column
-            if (h === "Date") return data;
+            if (h === "Date") return data; // allow HTML for tooltip
             return data;
           }
         }));
