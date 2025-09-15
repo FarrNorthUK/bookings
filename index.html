@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,6 @@
     h1 { margin-bottom: 20px; }
     table { width: 100%; }
 
-    /* ✅ Improvement 3: Better readability */
     table.dataTable tbody tr:nth-child(odd) {
       background-color: #f9f9f9;
     }
@@ -36,6 +35,14 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- dayjs for date parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/customParseFormat.js"></script>
+  <script>
+    // Enable dayjs custom format parsing
+    dayjs.extend(dayjs_plugin_customParseFormat);
+  </script>
 
   <script>
     Papa.parse('ReportUpcomingWeekVolEmail.txt', {
@@ -66,31 +73,49 @@
           "Arrive"
         ];
 
+        // Parse and format data
         data = data.map(row => {
           let obj = {};
           headers.forEach((h, i) => {
-            obj[h] = row[i] ?? "";
+            if (h === "Date") {
+              const fullDate = dayjs(row[i], "DD/MM/YYYY");
+              if (fullDate.isValid()) {
+                // Display dd/mm, but store full date in tooltip
+                obj[h] = `<span title="${fullDate.format("DD/MM/YYYY")}">${fullDate.format("DD/MM")}</span>`;
+                // Store fullDate for filtering
+                obj._fullDate = fullDate;
+              } else {
+                obj[h] = row[i];
+                obj._fullDate = null;
+              }
+            } else {
+              obj[h] = row[i] ?? "";
+            }
           });
           return obj;
+        });
+
+        // Custom filter: show only dates today or in the future
+        $.fn.dataTable.ext.search.push(function(settings, rowData) {
+          const today = dayjs().startOf('day');
+          const fullDate = rowData._fullDate;
+
+          if (!fullDate || !dayjs.isDayjs(fullDate)) return true; // Show if date is invalid
+          return fullDate.isSame(today) || fullDate.isAfter(today);
         });
 
         const columns = headers.map(h => ({
           title: h,
           data: h,
-          type: h === "Date" ? "date" : undefined,
-          className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
+          className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : "",
+          render: function(data, type, row, meta) {
+            // Prevent HTML from being escaped in Date column
+            if (h === "Date") return data;
+            return data;
+          }
         }));
 
-        // ✅ Custom filter: hide rows where Date < today
-        $.fn.dataTable.ext.search.push(function(settings, rowData) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); // midnight
-
-          const bookingDate = new Date(rowData["Date"]);
-          if (isNaN(bookingDate)) return true; // keep rows with invalid dates
-          return bookingDate >= today;
-        });
-
+        // Initialize the DataTable
         const table = $('#bookings').DataTable({
           data: data,
           columns: columns,
