@@ -40,33 +40,13 @@
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/customParseFormat.js"></script>
   <script>
-    dayjs.extend(dayjs_plugin_customParseFormat); // Enable custom format parsing
+    dayjs.extend(dayjs_plugin_customParseFormat);
   </script>
 
   <script>
     const url = 'https://farrnorthuk.github.io/bookings/ReportUpcomingWeekVolEmail.txt';
-    const cacheBuster = `${url}?t=${Date.now()}`; // Prevent cached file
+    const cacheBuster = `${url}?t=${Date.now()}`; // prevent caching
 
-   fetch(cacheBuster)
-    .then(response => {
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      return response.text();
-    })
-    .then(text => {
-      Papa.parse(text, {
-        header: false,
-        delimiter: ",",
-        skipEmptyLines: true,
-        complete: function(results) {
-          console.log("Fetched and parsed:", results.data);
-          // then continue with data handling & DataTables
-        }
-      });
-    })
-    .catch(err => {
-      console.error("Fetch error:", err);
-    });
-    
     Papa.parse(cacheBuster, {
       download: true,
       header: false,
@@ -88,7 +68,7 @@
           "Type", "Direction"
         ];
 
-        // Transform rows into objects with parsed dates
+        // Parse rows into objects with formatted Date and sortable date
         data = data.map(row => {
           const obj = {};
 
@@ -101,7 +81,7 @@
               if (fullDate.isValid()) {
                 obj[h] = `<span title="${fullDate.format("DD/MM/YYYY")}">${fullDate.format("DD/MM")}</span>`;
                 obj._fullDate = fullDate;
-                obj._fullDateSort = fullDate.valueOf(); // Timestamp for sorting
+                obj._fullDateSort = fullDate.valueOf(); // timestamp for sorting
               } else {
                 obj[h] = cell;
                 obj._fullDate = null;
@@ -115,7 +95,7 @@
           return obj;
         });
 
-        // Filter: only show today or future dates
+        // Filter to show only today or future bookings
         $.fn.dataTable.ext.search.push((settings, rowData) => {
           const today = dayjs().startOf('day');
           const fullDate = rowData._fullDate;
@@ -124,7 +104,7 @@
           return fullDate.isSame(today) || fullDate.isAfter(today);
         });
 
-        // Define columns with correct sort for date
+        // Set up columns
         const columns = headers.map(h => {
           if (h === "Date") {
             return {
@@ -132,7 +112,7 @@
               data: h,
               className: "dt-body-center",
               render: data => data,
-              orderData: "_fullDateSort"
+              orderData: headers.length // index of the hidden _fullDateSort column
             };
           }
 
@@ -143,6 +123,15 @@
           };
         });
 
+        // Add _fullDateSort as a hidden column for proper sorting
+        columns.push({
+          title: "_SortDate",
+          data: "_fullDateSort",
+          visible: false,
+          searchable: false
+        });
+
+        // Initialize DataTable
         $('#bookings').DataTable({
           data: data,
           columns: columns,
@@ -165,6 +154,9 @@
             [headers.indexOf("Setoff"), 'asc']
           ]
         });
+      },
+      error: function(err, file, inputElem, reason) {
+        console.error("PapaParse error:", err, reason);
       }
     });
   </script>
