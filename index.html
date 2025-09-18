@@ -47,6 +47,26 @@
     const url = 'https://farrnorthuk.github.io/bookings/ReportUpcomingWeekVolEmail.txt';
     const cacheBuster = `${url}?t=${Date.now()}`; // Prevent cached file
 
+   fetch(cacheBuster)
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.text();
+    })
+    .then(text => {
+      Papa.parse(text, {
+        header: false,
+        delimiter: ",",
+        skipEmptyLines: true,
+        complete: function(results) {
+          console.log("Fetched and parsed:", results.data);
+          // then continue with data handling & DataTables
+        }
+      });
+    })
+    .catch(err => {
+      console.error("Fetch error:", err);
+    });
+    
     Papa.parse(cacheBuster, {
       download: true,
       header: false,
