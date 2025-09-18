@@ -40,13 +40,12 @@
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/customParseFormat.js"></script>
   <script>
-    // Enable dayjs custom format parsing
-    dayjs.extend(dayjs_plugin_customParseFormat);
+    dayjs.extend(dayjs_plugin_customParseFormat); // Enable custom format parsing
   </script>
 
   <script>
     const url = 'https://farrnorthuk.github.io/bookings/ReportUpcomingWeekVolEmail.txt';
-    const cacheBuster = `${url}?t=${new Date().getTime()}`;
+    const cacheBuster = `${url}?t=${Date.now()}`; // Prevent cached file
 
     Papa.parse(cacheBuster, {
       download: true,
@@ -59,78 +58,72 @@
         let data = results.data;
 
         if (data.length === 0) {
-          document.querySelector("body").insertAdjacentHTML(
-            "beforeend",
-            "<p><em>No bookings found.</em></p>"
-          );
+          document.body.insertAdjacentHTML("beforeend", "<p><em>No bookings found.</em></p>");
           return;
         }
 
         const headers = [
-          "Date",
-          "Day",
-          "From",
-          "To",
-          "Setoff",
-          "Pickup",
-          "Arrive",
-          "Type",
-          "Direction"
+          "Date", "Day", "From", "To",
+          "Setoff", "Pickup", "Arrive",
+          "Type", "Direction"
         ];
 
-        // Parse and format data
+        // Transform rows into objects with parsed dates
         data = data.map(row => {
-          let obj = {};
+          const obj = {};
+
           headers.forEach((h, i) => {
+            const cell = row[i] ?? "";
+
             if (h === "Date") {
-              const fullDate = dayjs(row[i], "DD/MM/YYYY");
+              const fullDate = dayjs(cell, "DD/MM/YYYY");
+
               if (fullDate.isValid()) {
                 obj[h] = `<span title="${fullDate.format("DD/MM/YYYY")}">${fullDate.format("DD/MM")}</span>`;
                 obj._fullDate = fullDate;
-                obj._fullDateSort = fullDate.valueOf(); // 🛠️ This is used for sorting
+                obj._fullDateSort = fullDate.valueOf(); // Timestamp for sorting
               } else {
-                obj[h] = row[i];
+                obj[h] = cell;
                 obj._fullDate = null;
                 obj._fullDateSort = null;
               }
             } else {
-              obj[h] = row[i] ?? "";
+              obj[h] = cell;
             }
           });
+
           return obj;
         });
 
-        // Custom filter: show only dates today or in the future
-        $.fn.dataTable.ext.search.push(function(settings, rowData) {
+        // Filter: only show today or future dates
+        $.fn.dataTable.ext.search.push((settings, rowData) => {
           const today = dayjs().startOf('day');
           const fullDate = rowData._fullDate;
 
-          if (!fullDate || !dayjs.isDayjs(fullDate)) return true; // Show if date is invalid
+          if (!fullDate || !dayjs.isDayjs(fullDate)) return true;
           return fullDate.isSame(today) || fullDate.isAfter(today);
         });
 
+        // Define columns with correct sort for date
         const columns = headers.map(h => {
           if (h === "Date") {
             return {
               title: h,
               data: h,
               className: "dt-body-center",
-              render: function(data, type, row) {
-                return data; // Return the HTML with tooltip
-              },
-              orderData: "_fullDateSort" // 🛠️ Sort by real date
+              render: data => data,
+              orderData: "_fullDateSort"
             };
           }
 
           return {
             title: h,
             data: h,
-            className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
+            className: (["Pickup", "Arrive", "Setoff"].includes(h)) ? "dt-body-center" : ""
           };
         });
 
-        // Initialize the DataTable
-        const table = $('#bookings').DataTable({
+        $('#bookings').DataTable({
           data: data,
           columns: columns,
           pageLength: 25,
@@ -152,8 +145,6 @@
             [headers.indexOf("Setoff"), 'asc']
           ]
         });
-
-        table.draw();
       }
     });
   </script>
