@@ -3,4 +3,3 @@
 "24/09/2025","WED","Strathy","Thurso","08:00","08:20","09:05","Social","INBOUND"
 "25/09/2025","THU","Melvich","Thurso","09:00","09:30","10:10","Medical",
 "25/09/2025","THU","Melvich","Wick","14:20","15:00","16:15","Medical",
-"29/09/2025","MON","Bettyhill","Wick","08:00","","09:30","Medical",
