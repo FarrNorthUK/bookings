@@ -47,6 +47,7 @@
   <script>
     const url = 'https://farrnorthuk.github.io/bookings/ReportUpcomingWeekVolEmail.txt';
     const cacheBuster = `${url}?t=${new Date().getTime()}`;
+
     Papa.parse(cacheBuster, {
       download: true,
       header: false,
@@ -86,9 +87,11 @@
               if (fullDate.isValid()) {
                 obj[h] = `<span title="${fullDate.format("DD/MM/YYYY")}">${fullDate.format("DD/MM")}</span>`;
                 obj._fullDate = fullDate;
+                obj._fullDateSort = fullDate.valueOf(); // 🛠️ This is used for sorting
               } else {
                 obj[h] = row[i];
                 obj._fullDate = null;
+                obj._fullDateSort = null;
               }
             } else {
               obj[h] = row[i] ?? "";
@@ -106,15 +109,25 @@
           return fullDate.isSame(today) || fullDate.isAfter(today);
         });
 
-        const columns = headers.map(h => ({
-          title: h,
-          data: h,
-          className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : "",
-          render: function(data, type, row, meta) {
-            if (h === "Date") return data; // allow HTML for tooltip
-            return data;
+        const columns = headers.map(h => {
+          if (h === "Date") {
+            return {
+              title: h,
+              data: h,
+              className: "dt-body-center",
+              render: function(data, type, row) {
+                return data; // Return the HTML with tooltip
+              },
+              orderData: "_fullDateSort" // 🛠️ Sort by real date
+            };
           }
-        }));
+
+          return {
+            title: h,
+            data: h,
+            className: (h === "Pickup" || h === "Arrive" || h === "Setoff") ? "dt-body-center" : ""
+          };
+        });
 
         // Initialize the DataTable
         const table = $('#bookings').DataTable({
